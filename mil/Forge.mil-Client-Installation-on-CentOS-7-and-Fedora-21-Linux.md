@@ -83,16 +83,16 @@ Forge.mil has a PKI-enabled client called ForgeSCMC (Forge Source Code Managemen
   
 #Additional Resources
 
-  * [Getting Started with Linux](http://iase.disa.mil/pki-pke/getting_started/Pages/linux.aspx)
+  * DISA: [Getting Started with Linux](http://iase.disa.mil/pki-pke/getting_started/Pages/linux.aspx)
   
-  * [Getting Started with Firefox on Linux](http://iase.disa.mil/pki-pke/getting_started/Pages/linux-firefox.aspx)
+  * DISA: [Getting Started with Firefox on Linux](http://iase.disa.mil/pki-pke/getting_started/Pages/linux-firefox.aspx)
   
-  * [Forge.mil Support](https://software.forge.mil/sf/projects/support)
+  * Forge.mil: [Support](https://software.forge.mil/sf/projects/support)
   
-  * [Forge.mil Git and Gerrit](https://software.forge.mil/sf/projects/git-gerrit)
+  * Forge.mil: [Git and Gerrit](https://software.forge.mil/sf/projects/git-gerrit)
   
-  * [Forge.mil GIT and Gerrit PKI Enabled Clients](https://software.forge.mil/sf/go/page3501)
+  * Forge.mil: [GIT and Gerrit PKI Enabled Clients](https://software.forge.mil/sf/go/page3501)
   
-  * [ForgeSCMC Configuration and Usage](https://software.forge.mil/sf/go/doc82684)
+  * Forge.mil: [ForgeSCMC Configuration and Usage](https://software.forge.mil/sf/go/doc82684)
   
 
