@@ -36,11 +36,11 @@ Forge.mil has a PKI-enabled client called ForgeSCMC (Forge Source Code Managemen
 ```  
   2) Start the daemon
 ```
-    pcscd
+    sudo pcscd
 ```
   3) Check if it is running 
 ```
-    ps aux | grep pcsc
+    ps aux | grep pcscd
 ```
 ##Add browser PKCS#11 module and import certificates
 
@@ -77,7 +77,7 @@ Forge.mil has a PKI-enabled client called ForgeSCMC (Forge Source Code Managemen
   
   2) Install from the downloaded package
 ```
-    yum install ForgeSCMC-linux-amd64_1.2.2.rpm
+    sudo yum install ForgeSCMC-linux-amd64_1.2.2.rpm
 ```
   2) Select and open ForgeSCMC short-cut in menu system
   
