@@ -27,7 +27,7 @@
 # Configuration
 #// gINSERT {
 set -x
-DISK_DIR="../g-disk"
+DISK_DIR="g-disk"
 #}
 DISK_NAME=$1
 #// gINSERT
