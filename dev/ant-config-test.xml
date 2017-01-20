@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir=".." name="ant-config-test" default="test-config" 
+  xmlns:if="ant:if"
+  xmlns:unless="ant:unless"
+  xmlns:au="antlib:org.apache.ant.antunit">
+  <description/>
+<!-- MIT License
+
+    Copyright (c) 2017 George Moyano (https://onename.com/gmoyano)
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+-->    
+
+  <macrodef name="timestamp.echo"> 
+    <attribute name="message" default=""/>    
+    <sequential> 
+      <local name="current.time" />
+      <tstamp> 
+        <format property="current.time" pattern="yyyy/MM/dd hh:mm:ss"/> 
+      </tstamp>          
+      <echo message="@{message} ${current.time}" />
+    </sequential> 
+  </macrodef>
+
+  <macrodef name="math.increment">
+    <attribute name="operator1"/>
+    <attribute name="result"/>
+    <sequential>
+      <script language="javascript">
+        var operator = project.getProperty("@{operator1}");
+        <!--project.setProperty("@{result}", parseInt("@{operator1}")+1);-->
+        if (!operator)
+          project.setProperty("@{result}", 1);
+          <!--project.setProperty(attributes.get("@result"), 1);-->
+            <!--var operator1 = parseInt("@{operator1}");
+          if ( isNaN(operator1) )
+            project.setProperty("@{result}", 1);-->
+        else
+          project.setProperty("@{result}", parseInt(operator) + 1);
+      </script>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="test.ant.scripting">
+    <sequential>
+      <local name="first-operator"/>
+      <local name="second-operator"/>
+      <local name="result"/>
+      <property name="first-operator" value="1"/>
+      <echo message="test Ant scripting, specifically JavaScript..."/>
+      <echo message="increment $${first-operator}: [ ${first-operator} ]"/>
+      <math.increment operator1="first-operator" 
+        result="result"/>
+      <echo message="[ ${first-operator} ]++ = [ ${result} ]"/>
+      <property name="second-operator" value="${result}"/>
+      <math.increment operator1="second-operator" 
+        result="result"/>
+      <echo message="[ ${second-operator} ]++ = [ ${result} ]"/>
+    </sequential>
+  </macrodef>
+  
+  <target name="testConfig">
+    <timestamp.echo message=""/>
+    <echo message="$${ant.version}: [ ${ant.version} ]"/>
+    <echo message="$${ant.file}: [ ${ant.file} ]"/>
+    <echo message="$${basedir}: [ ${basedir} ]"/>
+    <echo message="$${ant.java.version}: [ ${ant.java.version} ]"/>
+    <echo message="$${os.name}: [ ${os.name} ]"/>
+    <test.ant.scripting/>
+  </target>
+  
+  <extension-point name="test-config" depends="testConfig" 
+    description="Test Ant configuration and capabilities."/>
+  
+</project>
