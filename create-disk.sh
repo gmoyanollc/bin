@@ -85,11 +85,12 @@ dd of=${new_disk_file} bs=1G count=0 seek=${file_size} status=progress
 LO_MOUNT=`losetup -f`
 VG_MOUNT=`date +%s | sha1sum | head -c 8`
 mount_point="${system_mount_point}/${USER}/${disk_name}"
-exit
 #}
 # gMODIFY
 #losetup /dev/loop0 /path/to/secretfs
 sudo losetup ${LO_MOUNT} ${new_disk_file}
+#// gINSERT
+echo "return code: $?"
 # Encrypt storage in the device. cryptsetup will use the Linux
 # device mapper to create, in this case, /dev/mapper/secretfs.
 # The -y option specifies that you'll be prompted to type the
@@ -99,7 +100,7 @@ sudo losetup ${LO_MOUNT} ${new_disk_file}
 # source: https://wiki.gentoo.org/wiki/Sakaki%27s_EFI_Install_Guide/Preparing_the_LUKS-LVM_Filesystem_and_Boot_USB_Key
 # derived from 
 #eval "gpg -q -d '${key_file}'" | sudo cryptsetup --cipher serpent-xts-plain64 --key-size 512 --hash sha512 --key-file - create ${VG_MOUNT} ${LO_MOUNT}
-sudo gpg -q -d ${key_file} | cryptsetup --cipher serpent-xts-plain64 --key-size 512 --hash sha512 --key-file - create ${VG_MOUNT} ${LO_MOUNT}
+gpg -q -d ${key_file} | sudo cryptsetup --cipher serpent-xts-plain64 --key-size 512 --hash sha512 --key-file - create ${VG_MOUNT} ${LO_MOUNT}
 # }
 # Or, if you want to use LUKS, you should use the following two
 # commands (optionally with additional) parameters. The first
@@ -126,19 +127,26 @@ sudo cryptsetup status ${VG_MOUNT}
 #dd if=/dev/zero of=/dev/mapper/secretfs
 sudo dd if=/dev/zero of=/dev/mapper/${VG_MOUNT} status=progress
 # Create a filesystem and verify its status
+#// gMODIFY
 #mke2fs -j -O dir_index /dev/mapper/secretfs
+#// gCOMMENT
 #tune2fs -l /dev/mapper/secretfs
-# gINSERT source: https://forums.opensuse.org/showthread.php/495891-Encrypted-ext4-partition-corrupted-Recovery-possible
-# gINSERT "ext4 is journeled and that adds read writes and can reduce the live of flash memory"
-# gINSERT ext4 filesystem threw errors: "Bad magic number in super-block"
-# gINSERT source: https://patrick.uiterwijk.org/blog/2013/2/25/gpg-encrypted-loopback-disks 
-# gINSERT createdisk.sh
-#mkfs.ext3 /dev/mapper/secretfs
+# gINSERT {
+# source: https://forums.opensuse.org/showthread.php/495891-Encrypted-ext4-partition-corrupted-Recovery-possible
+#   "ext4 is journeled and that adds read writes and can reduce the live of flash memory"
+#    ext4 filesystem threw errors: "Bad magic number in super-block"
+# source: https://patrick.uiterwijk.org/blog/2013/2/25/gpg-encrypted-loopback-disks 
+#    createdisk.sh
 sudo mkfs.ext3 /dev/mapper/${VG_MOUNT} -L ${disk_name}
+# }
 # Mount the new filesystem in a convenient location
+#// gMODIFY
 #mkdir /mnt/cryptofs/secretfs
-mkdir "${system_mount_point}/${USER}/${disk_name}"
+sudo mkdir "${system_mount_point}/${USER}/${disk_name}"
+#// gMODIFY
+# mount /dev/mapper/secretfs /mnt/cryptofs/secretfs
 sudo mount /dev/mapper/${VG_MOUNT} ${mount_point}
+#// gINSERT
 echo "return code: $?"
 #// gMODIFY
 #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
