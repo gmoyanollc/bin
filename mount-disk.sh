@@ -39,8 +39,13 @@ system_mount_point="/run/media"
 green="\033[32m"
 black="\033[0m"
 
-find ${HOME} -maxdepth 1 -type d
-read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
+if [ "$1" == "" ]; 
+then
+  find ${HOME} -maxdepth 1 -type d 
+  read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
+else
+  disk_dir="$1"
+fi
 if [ -d "${disk_dir}" ];
 then
   ls -1 ${disk_dir}
@@ -173,14 +178,18 @@ echo decrypting...
 if [ ${no_key} ];
 then 
   sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT
+  echo "return code: $?"
 else
-  eval "gpg -q -d '${key_file}'" | sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT
+  read -p "$(echo -e ${green}"? cypher: "${black})" cypher;
+  eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT
+  echo "return code: $?"
 fi
 #// gCOMMENT symmetric encryption
 #sudo cryptsetup create $VG_MOUNT $LO_MOUNT
 #// gINSERT
 sudo cryptsetup status $VG_MOUNT
 sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"
+echo "return code: $?"
 #// gMODIFY
 #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
 echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/$disk_name.mounted"

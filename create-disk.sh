@@ -84,6 +84,7 @@ dd of=${new_disk_file} bs=1G count=0 seek=${file_size} status=progress
 # gINSERT {
 LO_MOUNT=`losetup -f`
 VG_MOUNT=`date +%s | sha1sum | head -c 8`
+mount_point="${system_mount_point}/${USER}/${disk_name}"
 exit
 #}
 # gMODIFY
@@ -136,5 +137,13 @@ sudo dd if=/dev/zero of=/dev/mapper/${VG_MOUNT} status=progress
 sudo mkfs.ext3 /dev/mapper/${VG_MOUNT} -L ${disk_name}
 # Mount the new filesystem in a convenient location
 #mkdir /mnt/cryptofs/secretfs
-
+mkdir "${system_mount_point}/${USER}/${disk_name}"
+sudo mount /dev/mapper/${VG_MOUNT} ${mount_point}
+echo "return code: $?"
+#// gMODIFY
+#echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
+echo "$LO_MOUNT:$VG_MOUNT:${mount_point}" > "${new_disk_file}.mounted"
+#// gINSERT
+sudo chown -R "$USER:$USER" "${mount_point}"
+sudo -k
 
