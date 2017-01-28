@@ -100,6 +100,16 @@ else
     echo "Error: ${key_dir}/${key_name}.gpg could not be found!"
     exit 1
   fi
+  read -p "$(echo -e ${green}"? pin name (exclude '.gpg' suffix): "${black})" pin_name;
+  if [ -f "${key_dir}/${pin_name}.gpg" ];
+  then
+    ls -1 "${key_dir}/${pin_name}.gpg"
+    pin_file=${key_dir}/${pin_name}.gpg
+    cypher="$(gpg -q -d ${pin_file})"
+  else
+    echo "Error: ${key_dir}/${pin_name}.gpg could not be found!"
+    exit 1
+  fi
 fi
 #// }
 #// gCOMMENT {
@@ -180,8 +190,9 @@ then
   sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT
   echo "return code: $?"
 else
-  read -p "$(echo -e ${green}"? cypher: "${black})" cypher;
+  #read -p "$(echo -e ${green}"? cypher: "${black})" cypher;
   eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT
+  # add this for next change and test: '; (echo "return code: ${?}")'
   echo "return code: $?"
 fi
 #// gCOMMENT symmetric encryption
