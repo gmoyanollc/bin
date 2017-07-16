@@ -71,14 +71,6 @@ MOUNT_POINT=${system_mount_point}/${USER}/${disk_name}
 #// gINSERT {
 set +x
 find ${system_mount_point}/${USER}/* -maxdepth 2 -type d
-#read -p "$(echo -e ${green}"? key disk mount path: "${black})" KEY_DISK_MOUNT;
-#if [ -d "${KEY_DISK_MOUNT}" ];
-#then
-#  find ${KEY_DISK_MOUNT}/* -maxdepth 0 -type d
-#else
-#  echo "Error: ${KEY_DISK_MOUNT} could not be found!"
-#  exit 1
-#fi
 read -p "$(echo -e ${green}"? key dir ('n/a' for no key): "${black})" key_dir;
 if [ "${key_dir}" == "n/a" ];
 then 
@@ -105,7 +97,11 @@ else
   then
     ls -1 "${key_dir}/${pin_name}.gpg"
     pin_file=${key_dir}/${pin_name}.gpg
-    cypher="$(gpg -q -d ${pin_file})"
+    #// gCOMMENT neither of the following works for path containing space character
+    #cypher="$(gpg -q -d ${pin_file})"
+    #cypher=eval "gpg -q -d '${pin_file}'"
+    # disable the ui prompt
+    cypher="$(GPG_AGENT_INFO='' gpg -q -d ${pin_file})"
   else
     echo "Error: ${key_dir}/${pin_name}.gpg could not be found!"
     exit 1
@@ -171,7 +167,8 @@ then
 fi
 sudo mkdir "$MOUNT_POINT"
 # Fail on error
-set -e
+# gCOMMENT to test for a return code on decryption failure
+#set -e
 # Print every step we execute
 set -x
 # Do it
@@ -181,26 +178,32 @@ VG_MOUNT=`date +%s | sha1sum | head -c 8`
 #sudo losetup $LO_MOUNT "disks/$disk_name.disk"
 sudo losetup $LO_MOUNT "${disk_dir}/$disk_name.img.disk"
 #// gINSERT
-echo decrypting...
-#// gMODIFY
-#// gCOMMENT asymmetric encryption
-#gpg --no-default-keyring --secret-keyring keyrings/secret.gpg --keyring keyrings/public.gpg --trustdb-name keyrings/trustdb.gpg --decrypt "disks/$disk_name.key.gpg" | sudo cryptsetup luksOpen $LO_MOUNT $VG_MOUNT -d -
-if [ ${no_key} ];
-then 
-  sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT
+DECRYPT_ERROR=false
+
+until [ ${DECRYPT_ERROR} == "false" ]; do
+  echo decrypting...
+  #// gMODIFY
+  #// gCOMMENT asymmetric encryption
+  #gpg --no-default-keyring --secret-keyring keyrings/secret.gpg --keyring keyrings/public.gpg --trustdb-name keyrings/trustdb.gpg --decrypt "disks/$disk_name.key.gpg" | sudo cryptsetup luksOpen $LO_MOUNT $VG_MOUNT -d -
+  if [ ${no_key} ];
+  then 
+    sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT
+    echo "return code: $?"
+  else
+    #read -p "$(echo -e ${green}"? cypher: "${black})" cypher;
+    eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT; (echo "return code: ${?}")
+    #// gCOMMENT test for return code 0 to continue, other prompt for loop
+  fi
+  #// gCOMMENT symmetric encryption
+  #sudo cryptsetup create $VG_MOUNT $LO_MOUNT
+  #// gINSERT
+  sudo cryptsetup status $VG_MOUNT
+  sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"
   echo "return code: $?"
-else
-  #read -p "$(echo -e ${green}"? cypher: "${black})" cypher;
-  eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT
-  # add this for next change and test: '; (echo "return code: ${?}")'
-  echo "return code: $?"
-fi
-#// gCOMMENT symmetric encryption
-#sudo cryptsetup create $VG_MOUNT $LO_MOUNT
-#// gINSERT
-sudo cryptsetup status $VG_MOUNT
-sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"
-echo "return code: $?"
+  #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
+  [ ${?} != 0 ] && ${DECRYPT_ERROR}=true
+done
+
 #// gMODIFY
 #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
 echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/$disk_name.mounted"
