@@ -178,9 +178,9 @@ VG_MOUNT=`date +%s | sha1sum | head -c 8`
 #sudo losetup $LO_MOUNT "disks/$disk_name.disk"
 sudo losetup $LO_MOUNT "${disk_dir}/$disk_name.img.disk"
 #// gINSERT
-DECRYPT_ERROR=false
+DECRYPT_OK=true
 
-until [ ${DECRYPT_ERROR} == "false" ]; do
+while [ ${DECRYPT_OK} == "true" ]; do
   echo decrypting...
   #// gMODIFY
   #// gCOMMENT asymmetric encryption
@@ -201,7 +201,7 @@ until [ ${DECRYPT_ERROR} == "false" ]; do
   sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"
   echo "return code: $?"
   #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
-  [ ${?} != 0 ] && ${DECRYPT_ERROR}=true
+  if [ ${?} != 0 ]; then DECRYPT_OK=false ; fi
 done
 
 #// gMODIFY
@@ -210,4 +210,4 @@ echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/$disk_name.mounted"
 #// gINSERT
 sudo chown -R "$USER:$USER" "$MOUNT_POINT"
 sudo -k
-
+read -p "$(echo -e ${green}"? press any key to close session: "${black})" done;
