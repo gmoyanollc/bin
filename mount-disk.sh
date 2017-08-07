@@ -201,7 +201,12 @@ while [ ${DECRYPT_OK} == "true" ]; do
   sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"
   echo "return code: $?"
   #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
-  if [ ${?} != 0 ]; then DECRYPT_OK=false ; fi
+  if [ ${?} != 0 ]; then 
+    DECRYPT_OK=false
+    zenity --info --text="decryption attempt failed, try again or press ctrl-c to quit"
+  else
+    DECRYPT_OK=true
+  fi
 done
 
 #// gMODIFY
