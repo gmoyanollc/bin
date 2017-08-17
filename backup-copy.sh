@@ -23,60 +23,68 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+HELP="usage: ${0} source_dir source_name target_dir"
 system_mount_point="/run/media"
 green="\033[32m"
 black="\033[0m"
 
-if [ "$1" == "" ]; 
-then
+if [ "${1}" == "" ]; then
   find ${HOME} -maxdepth 1 -type d 
   read -p "$(echo -e ${green}"? source dir path: "${black})" source_dir;
 else
-  source_dir="$1"
+  if [ "${1}" == "--help" ]; then
+    echo -e "\n  ${HELP}\n"
+    exit 0
+  else
+    source_dir="${1}"
+  fi
 fi
-if [ -d "${source_dir}" ];
-then
-  ls -1 ${source_dir}
+if [ -d "${source_dir}" ]; then
+  ls -1 "${source_dir}"
 else
   echo "Error: ${source_dir} could not be found!"
   exit 1
 fi
-read -p "$(echo -e ${green}"? source name: "${black})" source_name;
-if [ -f "${source_dir}/${source_name}" ];
-then
+if [ "${2}" == "" ]; then
+  read -p "$(echo -e ${green}"? source name: "${black})" source_name;
+else
+  source_name="${2}"
+fi
+if [ -f "${source_dir}/${source_name}" ]; then
   ls -1 "${source_dir}/${source_name}"
 else
   echo "Error: ${source_dir}/${source_name} could not be found!"
   exit 1
 fi
-set -x
 
-MOUNT_POINT=${system_mount_point}/${USER}
-
-set +x
-find ${system_mount_point}/${USER}/* -maxdepth 2 -type d
-read -p "$(echo -e ${green}"? target dir: "${black})" target_dir;
-
-if [ -d "${target_dir}" ];
-then
+if [ "${3}" == "" ]; then
+  MOUNT_POINT=${system_mount_point}/${USER}
+  set +x
+  find ${system_mount_point}/${USER}/* -maxdepth 2 -type d
+  set -x
+  read -p "$(echo -e ${green}"? target dir: "${black})" target_dir;
+else
+  target_dir="${3}"
+fi
+if [ -d "${target_dir}" ]; then
   eval "ls -1 '${target_dir}'"
 else
   echo "Error: ${target_dir} could not be found!"
   exit 1
 fi
-#set -x
+
 date=$(date +%Y%m%d%H%M%S)
 cp -v ${source_dir}/${source_name} ${target_dir}/${source_name}-${date} &
 pid=$! # Process Id of the previous running command
-echo -e "\ncopying..."
+echo -e "\ncopying...\n"
 spin='-\|/'
-
 i=0
+
 while kill -0 $pid 2>/dev/null
 do
   i=$(( (i+1) %4 ))
   printf "\r${spin:$i:1}"
   sleep .1
 done
-echo -e "\n"
+echo -e "\ndone.\n"
 
