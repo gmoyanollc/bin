@@ -53,12 +53,12 @@ else
   echo "Error: ${disk_dir} could not be found!"
   exit 1
 fi
-read -p "$(echo -e ${green}"? disk name (exclude '.img.disk' suffix): "${black})" disk_name;
-if [ -f "${disk_dir}/${disk_name}.img.disk" ];
+read -p "$(echo -e ${green}"? disk name: "${black})" disk_name;
+if [ -f "${disk_dir}/${disk_name}" ];
 then
-  ls -1 "${disk_dir}/${disk_name}.img.disk"
+  ls -1 "${disk_dir}/${disk_name}"
 else
-  echo "Error: ${disk_dir}/${disk_name}.img.disk could not be found!"
+  echo "Error: ${disk_dir}/${disk_name} could not be found!"
   exit 1
 fi
 set -x
@@ -83,27 +83,27 @@ else
     echo "Error: ${key_dir} could not be found!"
     exit 1
   fi
-  read -p "$(echo -e ${green}"? key name (exclude '.gpg' suffix): "${black})" key_name;
-  if [ -f "${key_dir}/${key_name}.gpg" ];
+  read -p "$(echo -e ${green}"? key name: "${black})" key_name;
+  if [ -f "${key_dir}/${key_name}" ];
   then
-    ls -1 "${key_dir}/${key_name}.gpg"
-    key_file=${key_dir}/${key_name}.gpg
+    ls -1 "${key_dir}/${key_name}"
+    key_file=${key_dir}/${key_name}
   else
-    echo "Error: ${key_dir}/${key_name}.gpg could not be found!"
+    echo "Error: ${key_dir}/${key_name} could not be found!"
     exit 1
   fi
-  read -p "$(echo -e ${green}"? pin name (exclude '.gpg' suffix): "${black})" pin_name;
-  if [ -f "${key_dir}/${pin_name}.gpg" ];
+  read -p "$(echo -e ${green}"? pin name: "${black})" pin_name;
+  if [ -f "${key_dir}/${pin_name}" ];
   then
-    ls -1 "${key_dir}/${pin_name}.gpg"
-    pin_file=${key_dir}/${pin_name}.gpg
+    ls -1 "${key_dir}/${pin_name}"
+    pin_file=${key_dir}/${pin_name}
     #// gCOMMENT neither of the following works for path containing space character
     #cypher="$(gpg -q -d ${pin_file})"
     #cypher=eval "gpg -q -d '${pin_file}'"
     # disable the ui prompt
     cypher="$(GPG_AGENT_INFO='' gpg -q -d ${pin_file})"
   else
-    echo "Error: ${key_dir}/${pin_name}.gpg could not be found!"
+    echo "Error: ${key_dir}/${pin_name} could not be found!"
     exit 1
   fi
 fi
@@ -176,12 +176,12 @@ LO_MOUNT=`losetup -f`
 VG_MOUNT=`date +%s | sha1sum | head -c 8`
 #// gMODIFY
 #sudo losetup $LO_MOUNT "disks/$disk_name.disk"
-sudo losetup $LO_MOUNT "${disk_dir}/$disk_name.img.disk"
+sudo losetup $LO_MOUNT "${disk_dir}/$disk_name"
 #// gINSERT
 DECRYPT_OK=true
 
 while [ ${DECRYPT_OK} == "true" ]; do
-  echo decrypting...
+  echo -e "\ndecrypting...\n"
   #// gMODIFY
   #// gCOMMENT asymmetric encryption
   #gpg --no-default-keyring --secret-keyring keyrings/secret.gpg --keyring keyrings/public.gpg --trustdb-name keyrings/trustdb.gpg --decrypt "disks/$disk_name.key.gpg" | sudo cryptsetup luksOpen $LO_MOUNT $VG_MOUNT -d -
@@ -200,6 +200,7 @@ while [ ${DECRYPT_OK} == "true" ]; do
   sudo cryptsetup status $VG_MOUNT
   sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"
   echo "return code: $?"
+  read -p "pause to verify return code clears after error"
   #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
   if [ ${?} != 0 ]; then 
     DECRYPT_OK=false
