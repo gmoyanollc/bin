@@ -178,9 +178,9 @@ VG_MOUNT=`date +%s | sha1sum | head -c 8`
 #sudo losetup $LO_MOUNT "disks/$disk_name.disk"
 sudo losetup $LO_MOUNT "${disk_dir}/$disk_name"
 #// gINSERT
-DECRYPT_OK=true
+DECRYPT_OK=false
 
-while [ ${DECRYPT_OK} == "true" ]; do
+while [ ${DECRYPT_OK} == "false" ]; do
   echo -e "\ndecrypting...\n"
   #// gMODIFY
   #// gCOMMENT asymmetric encryption
@@ -200,7 +200,7 @@ while [ ${DECRYPT_OK} == "true" ]; do
   sudo cryptsetup status $VG_MOUNT
   sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"
   echo "return code: $?"
-  read -p "pause to verify return code clears after error"
+  #//read -p "pause to verify return code clears after error"
   #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
   if [ ${?} != 0 ]; then 
     DECRYPT_OK=false
