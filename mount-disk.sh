@@ -211,34 +211,31 @@ while [ ${decryptOk} == "false" ]; do
   #// gMODIFY
   #// gCOMMENT asymmetric encryption
   #gpg --no-default-keyring --secret-keyring keyrings/secret.gpg --keyring keyrings/public.gpg --trustdb-name keyrings/trustdb.gpg --decrypt "disks/$disk_name.key.gpg" | sudo cryptsetup luksOpen $LO_MOUNT $VG_MOUNT -d -
-  if [ ${no_key} ];
-  then 
-    sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT
-    echo "return code: $?"
+  if [ ${no_key} ]; then 
+    #// gCOMMENT symmetric encryption
+    #sudo cryptsetup create $VG_MOUNT $LO_MOUNT
+    sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
   else
-    #read -p "$(echo -e ${green}"? cypher: "${black})" cypher;
-    eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT; (echo "return code: ${?}")
-    #// gCOMMENT test for return code 0 to continue, other prompt for loop
+    #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
+    eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
   fi
-  #// gCOMMENT symmetric encryption
-  #sudo cryptsetup create $VG_MOUNT $LO_MOUNT
-  #// gINSERT
-  sudo cryptsetup status $VG_MOUNT
-  sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"
-  echo "return code: $?"
-  #//read -p "pause to verify return code clears after error"
-  #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
-  if [ ${?} != 0 ]; then 
-    zenity --info --text="decryption attempt failed, try again or press ctrl-c to quit"
-  else
+  if [ ${returnCode} == 0 ]; then 
     decryptOk=true
+    #// gINSERT
+    sudo cryptsetup status $VG_MOUNT; (echo "return code: ${?}")
+    sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"; (echo "return code: ${?}")
+    #// gMODIFY
+    #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
+    echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/$disk_name.mounted"
+    #// gINSERT
+    sudo chown -R "$USER:$USER" "$MOUNT_POINT"
+    sudo -k
+    read -p "$(echo -e ${green}"? press any key to close session: "${black})" done;
+  else
+    zenity --question --text="decryption attempt failed, try again?"; returnCode=${?}
+    if [ ${returnCode} == 1 ]; then
+      exit 1
+    fi
   fi
 done
 
-#// gMODIFY
-#echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
-echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/$disk_name.mounted"
-#// gINSERT
-sudo chown -R "$USER:$USER" "$MOUNT_POINT"
-sudo -k
-read -p "$(echo -e ${green}"? press any key to close session: "${black})" done;
