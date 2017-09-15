@@ -48,12 +48,12 @@ else
   echo "Error: ${key_dir} could not be found!"
   exit 1
 fi
-read -p "$(echo -e ${green}"? key name (exclude '.gpg' suffix): "${black})" key_name
-if [ -f "${key_dir}/${key_name}.gpg" ];
+read -p "$(echo -e ${green}"? key name: "${black})" key_name
+if [ -f "${key_dir}/${key_name}" ];
 then
-  ls -1 "${key_dir}/${key_name}.gpg"
+  ls -1 "${key_dir}/${key_name}"
 else
-  echo "Error: ${key_dir}/${key_name}.gpg could not be found!"
+  echo "Error: ${key_dir}/${key_name} could not be found!"
   exit 1;
 fi
 read -p "$(echo -e ${green}"? file size in gigabytes (exclude 'G' suffix): "${black})" file_size
@@ -66,7 +66,7 @@ else
 fi
 set -x
 new_disk_file=${disk_dir}/${disk_name}.img.disk
-key_file=${key_dir}/${key_name}.gpg
+key_file=${key_dir}/${key_name}
 file_size=${file_size}
 #// gINSERT source: https://wiki.centos.org/HowTos/EncryptedFilesystem {
 # Create an empty file...
