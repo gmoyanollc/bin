@@ -38,29 +38,39 @@
 system_mount_point="/run/media"
 green="\033[32m"
 black="\033[0m"
+dirOk=false
 
-if [ "$1" == "" ]; 
-then
-  find ${HOME} -maxdepth 1 -type d 
-  read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
-else
-  disk_dir="$1"
-fi
-if [ -d "${disk_dir}" ];
-then
-  ls -1 ${disk_dir}
-else
-  echo "Error: ${disk_dir} could not be found!"
-  exit 1
-fi
-read -p "$(echo -e ${green}"? disk name (exclude '.img.disk' suffix): "${black})" disk_name;
-if [ -f "${disk_dir}/${disk_name}.img.disk" ];
-then
-  ls -1 "${disk_dir}/${disk_name}.img.disk"
-else
-  echo "Error: ${disk_dir}/${disk_name}.img.disk could not be found!"
-  exit 1
-fi
+while [ ${dirOk} == "false" ]; do
+  if [ "$1" == "" ]; then
+    find ${HOME} -maxdepth 1 -type d 
+    read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
+  else
+    disk_dir="$1"
+  fi
+  if [ -d "${disk_dir}" ]; then
+    dirOk=true
+    ls -1 ${disk_dir}
+  else
+    echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
+    read -p "press any key to select another directory"
+    #exit 1
+  fi
+done
+
+fileOk=false
+
+while [ ${fileOk} == "false" ]; do
+  read -p "$(echo -e ${green}"? disk file: "${black})" disk_name;
+  if [ -f "${disk_dir}/${disk_name}" ]; then
+    fileOk=true
+    ls -1 "${disk_dir}/${disk_name}"
+  else
+    echo -e "\nERROR: file ${disk_dir}/${disk_name} could not be found!\n"
+    read -p "press any key to select another disk file"
+    #exit 1
+  fi
+done
+  
 set -x
 #}
 #// gCOMMENT
@@ -70,43 +80,59 @@ set -x
 MOUNT_POINT=${system_mount_point}/${USER}/${disk_name}
 #// gINSERT {
 set +x
-find ${system_mount_point}/${USER}/* -maxdepth 2 -type d
-read -p "$(echo -e ${green}"? key dir ('n/a' for no key): "${black})" key_dir;
-if [ "${key_dir}" == "n/a" ];
-then 
-  no_key=0
-else
-  if [ -d "${key_dir}" ];
-  then
-    eval "ls -1 '${key_dir}'"
+dirOk=false
+
+while [ ${dirOk} == "false" ]; do
+  find ${system_mount_point}/${USER}/* -maxdepth 2 -type d
+  read -p "$(echo -e ${green}"? key dir ('n/a' for no key): "${black})" key_dir;
+  if [ "${key_dir}" == "n/a" ]; then 
+    no_key=0
   else
-    echo "Error: ${key_dir} could not be found!"
-    exit 1
+    if [ -d "${key_dir}" ]; then
+      dirOk=true
+      eval "ls -1 '${key_dir}'"
+    else
+      echo -e "\nERROR: directory ${key_dir} could not be found!\n"
+      read -p "press any key to select another key directory"
+      #exit 1
+    fi
+    fileOk=false
+
+    while [ ${fileOk} == "false" ]; do
+      read -p "$(echo -e ${green}"? key file: "${black})" key_name;
+      if [ -f "${key_dir}/${key_name}" ]; then
+        fileOk=true
+        ls -1 "${key_dir}/${key_name}"
+        key_file=${key_dir}/${key_name}
+      else
+        echo -e "\nERROR: file ${key_dir}/${key_name} could not be found!\n"
+        read -p "press any key to select another key file"
+        #exit 1
+      fi
+    done
+
+    fileOk=false
+    while [ ${fileOk} == "false" ]; do
+      read -p "$(echo -e ${green}"? pin file: "${black})" pin_name;
+      if [ -f "${key_dir}/${pin_name}" ]; then
+        fileOk=true
+        ls -1 "${key_dir}/${pin_name}"
+        pin_file=${key_dir}/${pin_name}
+        #// gCOMMENT neither of the following works for path containing space character
+        #cypher="$(gpg -q -d ${pin_file})"
+        #cypher=eval "gpg -q -d '${pin_file}'"
+        # disable the ui prompt
+        cypher="$(GPG_AGENT_INFO='' gpg -q -d ${pin_file})"
+      else
+        echo -e "\nERROR: file ${key_dir}/${pin_name} could not be found!\n"
+        read -p "press any key to select another pin file"
+        #exit 1
+      fi
+    done
+    
   fi
-  read -p "$(echo -e ${green}"? key name (exclude '.gpg' suffix): "${black})" key_name;
-  if [ -f "${key_dir}/${key_name}.gpg" ];
-  then
-    ls -1 "${key_dir}/${key_name}.gpg"
-    key_file=${key_dir}/${key_name}.gpg
-  else
-    echo "Error: ${key_dir}/${key_name}.gpg could not be found!"
-    exit 1
-  fi
-  read -p "$(echo -e ${green}"? pin name (exclude '.gpg' suffix): "${black})" pin_name;
-  if [ -f "${key_dir}/${pin_name}.gpg" ];
-  then
-    ls -1 "${key_dir}/${pin_name}.gpg"
-    pin_file=${key_dir}/${pin_name}.gpg
-    #// gCOMMENT neither of the following works for path containing space character
-    #cypher="$(gpg -q -d ${pin_file})"
-    #cypher=eval "gpg -q -d '${pin_file}'"
-    # disable the ui prompt
-    cypher="$(GPG_AGENT_INFO='' gpg -q -d ${pin_file})"
-  else
-    echo "Error: ${key_dir}/${pin_name}.gpg could not be found!"
-    exit 1
-  fi
-fi
+done
+
 #// }
 #// gCOMMENT {
 #if [ ! -f "${key_file}" ];
@@ -176,43 +202,40 @@ LO_MOUNT=`losetup -f`
 VG_MOUNT=`date +%s | sha1sum | head -c 8`
 #// gMODIFY
 #sudo losetup $LO_MOUNT "disks/$disk_name.disk"
-sudo losetup $LO_MOUNT "${disk_dir}/$disk_name.img.disk"
+sudo losetup $LO_MOUNT "${disk_dir}/$disk_name"
 #// gINSERT
-DECRYPT_OK=true
+decryptOk=false
 
-while [ ${DECRYPT_OK} == "true" ]; do
-  echo decrypting...
+while [ ${decryptOk} == "false" ]; do
+  echo -e "\ndecrypting...\n"
   #// gMODIFY
   #// gCOMMENT asymmetric encryption
   #gpg --no-default-keyring --secret-keyring keyrings/secret.gpg --keyring keyrings/public.gpg --trustdb-name keyrings/trustdb.gpg --decrypt "disks/$disk_name.key.gpg" | sudo cryptsetup luksOpen $LO_MOUNT $VG_MOUNT -d -
-  if [ ${no_key} ];
-  then 
-    sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT
-    echo "return code: $?"
+  if [ ${no_key} ]; then 
+    #// gCOMMENT symmetric encryption
+    #sudo cryptsetup create $VG_MOUNT $LO_MOUNT
+    sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
   else
-    #read -p "$(echo -e ${green}"? cypher: "${black})" cypher;
-    eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT; (echo "return code: ${?}")
-    #// gCOMMENT test for return code 0 to continue, other prompt for loop
+    #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
+    eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
   fi
-  #// gCOMMENT symmetric encryption
-  #sudo cryptsetup create $VG_MOUNT $LO_MOUNT
-  #// gINSERT
-  sudo cryptsetup status $VG_MOUNT
-  sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"
-  echo "return code: $?"
-  #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
-  if [ ${?} != 0 ]; then 
-    DECRYPT_OK=false
-    zenity --info --text="decryption attempt failed, try again or press ctrl-c to quit"
+  if [ ${returnCode} == 0 ]; then 
+    decryptOk=true
+    #// gINSERT
+    sudo cryptsetup status $VG_MOUNT; (echo "return code: ${?}")
+    sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"; (echo "return code: ${?}")
+    #// gMODIFY
+    #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
+    echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/$disk_name.mounted"
+    #// gINSERT
+    sudo chown -R "$USER:$USER" "$MOUNT_POINT"
+    sudo -k
+    read -p "$(echo -e ${green}"? press any key to close session: "${black})" done;
   else
-    DECRYPT_OK=true
+    zenity --question --text="decryption attempt failed, try again?"; returnCode=${?}
+    if [ ${returnCode} == 1 ]; then
+      exit 1
+    fi
   fi
 done
 
-#// gMODIFY
-#echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
-echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/$disk_name.mounted"
-#// gINSERT
-sudo chown -R "$USER:$USER" "$MOUNT_POINT"
-sudo -k
-read -p "$(echo -e ${green}"? press any key to close session: "${black})" done;

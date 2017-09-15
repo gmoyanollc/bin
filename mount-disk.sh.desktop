@@ -2,9 +2,8 @@
 Version=x.y
 Name=mount-disk.sh
 Comment=
-Exec=bash -c "\$HOME/bin/mount-disk.sh"
+Exec=mount-disk.sh
 Icon=
 Terminal=true
 Type=Application
 Categories=Utility;Application;
-
