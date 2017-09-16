@@ -198,6 +198,7 @@ sudo mkdir "$MOUNT_POINT"
 # Print every step we execute
 set -x
 # Do it
+#// gCOMMENT left single quotes aren't working as expected in bash, in sh, they execute
 LO_MOUNT=`losetup -f`
 VG_MOUNT=`date +%s | sha1sum | head -c 8`
 #// gMODIFY
@@ -223,13 +224,19 @@ while [ ${decryptOk} == "false" ]; do
     decryptOk=true
     #// gINSERT
     sudo cryptsetup status $VG_MOUNT; (echo "return code: ${?}")
-    sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"; (echo "return code: ${?}")
-    #// gMODIFY
-    #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
-    echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/$disk_name.mounted"
-    #// gINSERT
-    sudo chown -R "$USER:$USER" "$MOUNT_POINT"
-    sudo -k
+    sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"; returnCode=${?}; (echo "return code: ${?}")
+    #// gINSERT {
+    if [ ${returnCode} == 0 ]; then
+      #// gINSERT }
+      #// gMODIFY
+      #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
+      echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/$disk_name.mounted"
+      #// gINSERT
+      sudo chown -R "$USER:$USER" "$MOUNT_POINT"
+      sudo -k
+    else
+      echo "  ERROR: mount failure"
+    fi
     read -p "$(echo -e ${green}"? press any key to close session: "${black})" done;
   else
     zenity --question --text="decryption attempt failed, try again?"; returnCode=${?}
