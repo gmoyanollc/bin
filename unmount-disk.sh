@@ -26,17 +26,49 @@
 
 # Configuration
 #// gINSERT {
-set -x
-DISK_DIR="g-disk"
-#}
-DISK_NAME=$1
-#// gINSERT
-set +x
-if [ ! -n "$DISK_NAME" ];
-then
-    echo "Usage: $0 disk-name"
-    exit 1
-fi
+#set -x
+#DISK_DIR="g-disk"
+dirOk=false
+
+while [ ${dirOk} == "false" ]; do
+  if [ "$1" == "" ]; then
+    find ${HOME} -maxdepth 1 -type d 
+    read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
+  else
+    disk_dir="$1"
+  fi
+  if [ -d "${disk_dir}" ]; then
+    dirOk=true
+    ls -1 ${disk_dir}
+  else
+    echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
+    read -p "press any key to select another directory"
+    #exit 1
+  fi
+done
+
+fileOk=false
+
+while [ ${fileOk} == "false" ]; do
+  read -p "$(echo -e ${green}"? disk file: "${black})" disk_name;
+  if [ -f "${disk_dir}/${disk_name}" ]; then
+    fileOk=true
+    ls -1 "${disk_dir}/${disk_name}"
+  else
+    echo -e "\nERROR: file ${disk_dir}/${disk_name} could not be found!\n"
+    read -p "press any key to select another disk file"
+    #exit 1
+  fi
+done
+
+#// gCOMMENT-OUT {
+#set +x
+#if [ ! -n "$DISK_NAME" ];
+#then
+#    echo "Usage: $0 disk-name"
+#    exit 1
+#fi
+#// gCOMMENT-OUT }
 # Fail on error
 set -e
 # Print all commands on execution
@@ -45,16 +77,16 @@ set -e
 # Get disk info
 #// gMODIFY
 #if [ ! -f "disks/$DISK_NAME.mounted" ];
-if [ ! -f "${DISK_DIR}/$DISK_NAME.mounted" ];
+if [ ! -f "${disk_dir}/$disk_name.mounted" ];
 then
-    echo "Disk $DISK_NAME was not mounted!"
+    echo "Disk $disk_name was not mounted!"
     exit -1
 fi
 #// gINSERT
-set +x
+set -x
 #// gMODIFY
 #MOUNT_INFO="`cat "disks/$DISK_NAME.mounted"`"
-MOUNT_INFO="`cat "${DISK_DIR}/$DISK_NAME.mounted"`"
+MOUNT_INFO="`cat "${disk_dir}/$disk_name.mounted"`"
 LO_MOUNT="`echo $MOUNT_INFO | awk -F":" '{print $1}'`"
 VG_MOUNT="`echo $MOUNT_INFO | awk -F":" '{print $2}'`"
 MOUNT_POINT="`echo $MOUNT_INFO | awk -F":" '{print $3}'`"
@@ -65,6 +97,6 @@ sudo cryptsetup close /dev/mapper/$VG_MOUNT
 sudo losetup --detach $LO_MOUNT
 #// gMODIFY
 #rm -f "disks/$DISK_NAME.mounted"
-rm -f "${DISK_DIR}/$DISK_NAME.mounted"
+rm -f "${disk_dir}/$disk_name.mounted"
 sudo rmdir "$MOUNT_POINT"
 sudo -k
