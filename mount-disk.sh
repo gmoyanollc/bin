@@ -122,7 +122,7 @@ while [ ${dirOk} == "false" ]; do
         #cypher="$(gpg -q -d ${pin_file})"
         #cypher=eval "gpg -q -d '${pin_file}'"
         # disable the ui prompt
-        cypher="$(GPG_AGENT_INFO='' gpg -q -d ${pin_file})"
+        cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"
       else
         echo -e "\nERROR: file ${key_dir}/${pin_name} could not be found!\n"
         read -p "press any key to select another pin file"
