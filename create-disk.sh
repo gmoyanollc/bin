@@ -35,7 +35,7 @@ if [ -d "${disk_dir}" ];
 then
   ls -1d ${disk_dir}
 else
-  echo "Error: ${disk_dir} could not be found!"
+  echo "  ERROR: ${disk_dir} could not be found!"
   exit 1
 fi
 read -p "$(echo -e ${green}"? new disk name (exclude '.img.disk' suffix): "${black})" disk_name;
@@ -45,7 +45,7 @@ if [ -d "${key_dir}" ];
 then
   eval "ls -1 '${key_dir}'"
 else
-  echo "Error: ${key_dir} could not be found!"
+  echo "  ERROR: ${key_dir} could not be found!"
   exit 1
 fi
 read -p "$(echo -e ${green}"? key name: "${black})" key_name
@@ -53,16 +53,16 @@ if [ -f "${key_dir}/${key_name}" ];
 then
   ls -1 "${key_dir}/${key_name}"
 else
-  echo "Error: ${key_dir}/${key_name} could not be found!"
+  echo "  ERROR: ${key_dir}/${key_name} could not be found!"
   exit 1;
 fi
 read -p "$(echo -e ${green}"? file size in gigabytes (exclude 'G' suffix): "${black})" file_size
 if ! [[ "${file_size}" =~ (${reg_exp_int}) ]];
 then
-  echo "Error: ${file_size} is not an integer!"
+  echo "  ERROR - not an integer: ${file_size}"
   exit 1
 else
-  echo "Match is ${BASH_REMATCH[1]}, ${file_size} is an integer."
+  echo "  INFO - match an integer: ${BASH_REMATCH[1]}, ${file_size}"
 fi
 set -x
 new_disk_file=${disk_dir}/${disk_name}.img.disk
@@ -88,9 +88,11 @@ mount_point="${system_mount_point}/${USER}/${disk_name}"
 #}
 # gMODIFY
 #losetup /dev/loop0 /path/to/secretfs
-sudo losetup ${LO_MOUNT} ${new_disk_file}
+sudo losetup ${LO_MOUNT} ${new_disk_file} ; returnCode=${?}
 #// gINSERT
-echo "return code: $?"
+if [ ! ${returnCode} == 0 ]; then
+  echo "  WARNING: return code: ${?}"
+fi
 # Encrypt storage in the device. cryptsetup will use the Linux
 # device mapper to create, in this case, /dev/mapper/secretfs.
 # The -y option specifies that you'll be prompted to type the
@@ -100,7 +102,11 @@ echo "return code: $?"
 # source: https://wiki.gentoo.org/wiki/Sakaki%27s_EFI_Install_Guide/Preparing_the_LUKS-LVM_Filesystem_and_Boot_USB_Key
 # derived from 
 #eval "gpg -q -d '${key_file}'" | sudo cryptsetup --cipher serpent-xts-plain64 --key-size 512 --hash sha512 --key-file - create ${VG_MOUNT} ${LO_MOUNT}
-gpg -q -d ${key_file} | sudo cryptsetup --cipher serpent-xts-plain64 --key-size 512 --hash sha512 --key-file - create ${VG_MOUNT} ${LO_MOUNT}
+gpg -q -d "${key_file}" | sudo cryptsetup --cipher serpent-xts-plain64 --key-size 512 --hash sha512 --key-file - create ${VG_MOUNT} ${LO_MOUNT} ; returnCode=${?}
+if [ ! ${returnCode} == 0 ]; then
+  echo "  ERRROR - return code: ${returnCode}"
+  exit ${returnCode}
+fi
 # }
 # Or, if you want to use LUKS, you should use the following two
 # commands (optionally with additional) parameters. The first
@@ -125,7 +131,12 @@ sudo cryptsetup status ${VG_MOUNT}
 # the encrypted filesystem.
 # gMODIFY
 #dd if=/dev/zero of=/dev/mapper/secretfs
-sudo dd if=/dev/zero of=/dev/mapper/${VG_MOUNT} status=progress
+sudo dd if=/dev/zero of=/dev/mapper/${VG_MOUNT} status=progress ; returnCode=${?}
+# gINSERT {
+if [ ! ${returnCode} == 0 ]; then
+  echo "  WARNING: return code: ${returnCode}"
+fi
+# }
 # Create a filesystem and verify its status
 #// gMODIFY
 #mke2fs -j -O dir_index /dev/mapper/secretfs
@@ -137,17 +148,29 @@ sudo dd if=/dev/zero of=/dev/mapper/${VG_MOUNT} status=progress
 #    ext4 filesystem threw errors: "Bad magic number in super-block"
 # source: https://patrick.uiterwijk.org/blog/2013/2/25/gpg-encrypted-loopback-disks 
 #    createdisk.sh
-sudo mkfs.ext3 /dev/mapper/${VG_MOUNT} -L ${disk_name}
+sudo mkfs.ext3 /dev/mapper/${VG_MOUNT} -L ${disk_name} ; returnCode=${?}
+if [ ! ${returnCode} == 0 ]; then
+  echo "  ERROR - return code: ${returnCode}"
+  exit ${returnCode}
+fi
 # }
 # Mount the new filesystem in a convenient location
 #// gMODIFY
 #mkdir /mnt/cryptofs/secretfs
 sudo mkdir "${system_mount_point}/${USER}/${disk_name}"
+# gINSERT {
+if [ ! ${returnCode} == 0 ]; then
+  echo "  WARNING - return code: ${returnCode}"
+fi
+# }
 #// gMODIFY
 # mount /dev/mapper/secretfs /mnt/cryptofs/secretfs
-sudo mount /dev/mapper/${VG_MOUNT} ${mount_point}
+sudo mount /dev/mapper/${VG_MOUNT} ${mount_point} ; returnCode=${?}
 #// gINSERT
-echo "return code: $?"
+if [ ! ${returnCode} == 0 ]; then
+  echo "  ERROR - return code: ${?}"
+  exit ${returnCode}
+fi
 #// gMODIFY
 #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
 echo "$LO_MOUNT:$VG_MOUNT:${mount_point}" > "${new_disk_file}.mounted"
