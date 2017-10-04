@@ -35,14 +35,14 @@
 
 # Configuration
 #// gINSERT {
-system_mount_point="/run/media"
+SYSTEM_MOUNT_POINT="/run/media"
 green="\033[32m"
 black="\033[0m"
 dirOk=false
 
 while [ ${dirOk} == "false" ]; do
   if [ "$1" == "" ]; then
-    find ${HOME} -maxdepth 1 -type d 
+    find ${HOME} ${SYSTEM_MOUNT_POINT}/${USER} -maxdepth 1 -type d 
     read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
   else
     disk_dir="$1"
@@ -52,7 +52,7 @@ while [ ${dirOk} == "false" ]; do
     ls -1 ${disk_dir}
   else
     echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
-    read -p "press any key to select another directory"
+    #read -p "press any key to select another directory"
     #exit 1
   fi
 done
@@ -66,7 +66,7 @@ while [ ${fileOk} == "false" ]; do
     ls -1 "${disk_dir}/${disk_name}"
   else
     echo -e "\nERROR: file ${disk_dir}/${disk_name} could not be found!\n"
-    read -p "press any key to select another disk file"
+    #read -p "press any key to select another disk file"
     #exit 1
   fi
 done
@@ -77,13 +77,13 @@ set -x
 #disk_name=$1
 #// gMODIFY
 #MOUNT_POINT=$2
-MOUNT_POINT=${system_mount_point}/${USER}/${disk_name}
+MOUNT_POINT=${SYSTEM_MOUNT_POINT}/${USER}/${disk_name}
 #// gINSERT {
 set +x
 dirOk=false
 
 while [ ${dirOk} == "false" ]; do
-  find ${system_mount_point}/${USER}/* -maxdepth 2 -type d
+  find ${SYSTEM_MOUNT_POINT}/${USER}/* -maxdepth 2 -type d
   read -p "$(echo -e ${green}"? key dir ('n/a' for no key): "${black})" key_dir;
   if [ "${key_dir}" == "n/a" ]; then 
     no_key=0
@@ -93,7 +93,7 @@ while [ ${dirOk} == "false" ]; do
       eval "ls -1 '${key_dir}'"
     else
       echo -e "\nERROR: directory ${key_dir} could not be found!\n"
-      read -p "press any key to select another key directory"
+      #read -p "press any key to select another key directory"
       #exit 1
     fi
     fileOk=false
@@ -106,7 +106,7 @@ while [ ${dirOk} == "false" ]; do
         key_file=${key_dir}/${key_name}
       else
         echo -e "\nERROR: file ${key_dir}/${key_name} could not be found!\n"
-        read -p "press any key to select another key file"
+        #read -p "press any key to select another key file"
         #exit 1
       fi
     done
@@ -125,7 +125,7 @@ while [ ${dirOk} == "false" ]; do
         cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"
       else
         echo -e "\nERROR: file ${key_dir}/${pin_name} could not be found!\n"
-        read -p "press any key to select another pin file"
+        #read -p "press any key to select another pin file"
         #exit 1
       fi
     done

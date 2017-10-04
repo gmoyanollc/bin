@@ -28,11 +28,12 @@
 #// gINSERT {
 #set -x
 #DISK_DIR="g-disk"
+SYSTEM_MOUNT_POINT="/run/media"
 dirOk=false
 
 while [ ${dirOk} == "false" ]; do
   if [ "$1" == "" ]; then
-    find ${HOME} -maxdepth 1 -type d 
+    find ${HOME} ${SYSTEM_MOUNT_POINT}/${USER} -maxdepth 1 -type d 
     read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
   else
     disk_dir="$1"
@@ -42,7 +43,7 @@ while [ ${dirOk} == "false" ]; do
     ls -1 ${disk_dir}
   else
     echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
-    read -p "press any key to select another directory"
+    #read -p "press any key to select another directory"
     #exit 1
   fi
 done
@@ -56,7 +57,7 @@ while [ ${fileOk} == "false" ]; do
     ls -1 "${disk_dir}/${disk_name}"
   else
     echo -e "\nERROR: file ${disk_dir}/${disk_name} could not be found!\n"
-    read -p "press any key to select another disk file"
+    #read -p "press any key to select another disk file"
     #exit 1
   fi
 done
