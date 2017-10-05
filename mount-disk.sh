@@ -23,9 +23,16 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # // gINSERT { 
+# // mount-disk.sh mounts an asynchronously encrypted virtual partition file.  
+#
+# // mount-disk.sh is designed to implement two-factor authentication with the  
+# // key file stored on an external resource such as a USB drive.
+#
+# // mount-disk.sh works in conjuction with unmount-disk.sh and create-disk.sh.
+#
 # // Original source: https://patrick.uiterwijk.org/blog/2013/2/25/gpg-encrypted-loopback-disks
 # //
-# // Copyright (2016), [George Moyano](https://onename.com/gmoyano)
+# // Copyright (2016-2017), [George Moyano](https://onename.com/gmoyano)
 # // All rights reserved.
 # //
 # // Source code lines and blocks preceded by the characters "// g" are contributions 
@@ -35,14 +42,16 @@
 
 # Configuration
 #// gINSERT {
-SYSTEM_MOUNT_POINT="/run/media"
+USER_MOUNT_POINT="/run/media"
+SYSTEM_MOUNT_POINT="/media"
 green="\033[32m"
 black="\033[0m"
 dirOk=false
 
 while [ ${dirOk} == "false" ]; do
   if [ "$1" == "" ]; then
-    find ${HOME} ${SYSTEM_MOUNT_POINT}/${USER} -maxdepth 1 -type d 
+    find "${HOME}" -maxdepth 1 -type d 
+    find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d 
     read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
   else
     disk_dir="$1"
@@ -77,13 +86,13 @@ set -x
 #disk_name=$1
 #// gMODIFY
 #MOUNT_POINT=$2
-MOUNT_POINT=${SYSTEM_MOUNT_POINT}/${USER}/${disk_name}
+MOUNT_POINT=${USER_MOUNT_POINT}/${USER}/${disk_name}
 #// gINSERT {
 set +x
 dirOk=false
 
 while [ ${dirOk} == "false" ]; do
-  find ${SYSTEM_MOUNT_POINT}/${USER}/* -maxdepth 2 -type d
+  find ${USER_MOUNT_POINT}/${USER}/* -maxdepth 2 -type d
   read -p "$(echo -e ${green}"? key dir ('n/a' for no key): "${black})" key_dir;
   if [ "${key_dir}" == "n/a" ]; then 
     no_key=0

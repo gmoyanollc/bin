@@ -28,12 +28,14 @@
 #// gINSERT {
 #set -x
 #DISK_DIR="g-disk"
-SYSTEM_MOUNT_POINT="/run/media"
+USER_MOUNT_POINT="/run/media"
+SYSTEM_MOUNT_POINT="/media"
 dirOk=false
 
 while [ ${dirOk} == "false" ]; do
   if [ "$1" == "" ]; then
-    find ${HOME} ${SYSTEM_MOUNT_POINT}/${USER} -maxdepth 1 -type d 
+    find "${HOME}" -maxdepth 1 -type d 
+    find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d
     read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
   else
     disk_dir="$1"
