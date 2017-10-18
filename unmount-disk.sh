@@ -33,34 +33,36 @@ SYSTEM_MOUNT_POINT="/media"
 dirOk=false
 
 while [ ${dirOk} == "false" ]; do
-  if [ "$1" == "" ]; then
+  if [ "${1}" == "" ]; then
     find "${HOME}" -maxdepth 1 -type d 
     find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d
     read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
   else
-    disk_dir="$1"
+    disk_dir="${1}"
   fi
   if [ -d "${disk_dir}" ]; then
     dirOk=true
     ls -1 ${disk_dir}
   else
     echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
-    #read -p "press any key to select another directory"
-    #exit 1
+    set -- "" "${@:2}"
   fi
 done
 
 fileOk=false
 
 while [ ${fileOk} == "false" ]; do
-  read -p "$(echo -e ${green}"? disk file: "${black})" disk_name;
+  if [ "${2}" == "" ]; then
+    read -p "$(echo -e ${green}"? disk file: "${black})" disk_name;
+  else
+    disk_name="${2}"
+  fi
   if [ -f "${disk_dir}/${disk_name}" ]; then
     fileOk=true
     ls -1 "${disk_dir}/${disk_name}"
   else
     echo -e "\nERROR: file ${disk_dir}/${disk_name} could not be found!\n"
-    #read -p "press any key to select another disk file"
-    #exit 1
+    set -- "${@:1}" ""
   fi
 done
 

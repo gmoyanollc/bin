@@ -49,20 +49,19 @@ black="\033[0m"
 dirOk=false
 
 while [ ${dirOk} == "false" ]; do
-  if [ "$1" == "" ]; then
+  if [ "${1}" == "" ]; then
     find "${HOME}" -maxdepth 1 -type d 
     find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d 
     read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
   else
-    disk_dir="$1"
+    disk_dir="${1}"
   fi
   if [ -d "${disk_dir}" ]; then
     dirOk=true
     ls -1 ${disk_dir}
   else
     echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
-    #read -p "press any key to select another directory"
-    #exit 1
+    set -- "${@:1}" ""
   fi
 done
 
@@ -174,7 +173,7 @@ done
 #// }
 #// gMODIFY
 #if [ -f "disks/$disk_name.mounted" ];
-if [ -f "${disk_dir}/$disk_name.mounted" ];
+if [ -f "${disk_dir}/${disk_name}.mounted" ];
 then
   if [ "$3" == "auto" ];
   then
@@ -182,7 +181,7 @@ then
   else
     #// gMODIFY
     #echo "Error: Disk $disk_name is already mounted!"
-    echo "Warning: Disk $disk_name may already be mounted!"
+    echo "Warning: Disk ${disk_name} may already be mounted!"
     #// gINSERT {
     read -p "$(echo -e ${green}"? ignore (y/n): "${black})" ignore;
     if [ ${ignore} == "y" ];
@@ -212,7 +211,7 @@ LO_MOUNT=`losetup -f`
 VG_MOUNT=`date +%s | sha1sum | head -c 8`
 #// gMODIFY
 #sudo losetup $LO_MOUNT "disks/$disk_name.disk"
-sudo losetup $LO_MOUNT "${disk_dir}/$disk_name"
+sudo losetup $LO_MOUNT "${disk_dir}/${disk_name}"
 #// gINSERT
 decryptOk=false
 
@@ -239,14 +238,23 @@ while [ ${decryptOk} == "false" ]; do
       #// gINSERT }
       #// gMODIFY
       #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
-      echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/$disk_name.mounted"
+      echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/${disk_name}.mounted"
       #// gINSERT
       sudo chown -R "$USER:$USER" "$MOUNT_POINT"
       sudo -k
     else
       echo "  ERROR: mount failure"
     fi
-    read -p "$(echo -e ${green}"? press any key to close session: "${black})" done;
+    echo -e "\n  ** successful disk mount ** \n"
+    echo -e "$(echo -e ${GREEN}"  ? ready to unmount: "${BLACK})" 
+    
+    select unmount in "yes" "quit"; do
+      case ${unmount} in
+        yes ) sh unmount-disk.sh ${disk_dir} ${disk_name}; break;;
+        quit ) exit;;
+      esac
+    done
+    
   else
     zenity --question --text="decryption attempt failed, try again?"; returnCode=${?}
     if [ ${returnCode} == 1 ]; then
