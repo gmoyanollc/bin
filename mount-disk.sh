@@ -141,125 +141,141 @@ while [ ${dirOk} == "false" ]; do
   fi
 done
 
-#// }
-#// gCOMMENT {
-#if [ ! -f "${key_file}" ];
-#then
-#    echo "Error: ${key_file} could not be found!"
-#    exit 1
-#fi
-#if [ ! -n "$disk_name" ];
-#then
-#    echo "Usage: $0 disk-name [mount-point] <auto>"
-#    exit 1
-#fi
-#if [ ! -n "$MOUNT_POINT" ];
-#then
-#    echo "Warning: No MOUNT_POINT env var set. Using $HOME/mounted-$disk_name"
-#    MOUNT_POINT="$HOME/mounted-$disk_name"
-#fi
-#if [ ! -f "${disk_dir}/$disk_name.disk" ];
-#then
-#    echo "Error: $disk_name could not be found!"
-#    exit 1
-#fi
-# }
-# gCOMMENT {
-#if [ ! -f "disks/$disk_name.key.gpg" ];
-#then
-#    echo "Error: Key for $disk_name could not be found!"
-#    exit 1
-#fi
-#// }
-#// gMODIFY
-#if [ -f "disks/$disk_name.mounted" ];
-if [ -f "${disk_dir}/${disk_name}.mounted" ];
-then
-  if [ "$3" == "auto" ];
-  then
-    exit 0
-  else
-    #// gMODIFY
-    #echo "Error: Disk $disk_name is already mounted!"
-    echo "Warning: Disk ${disk_name} may already be mounted!"
-    #// gINSERT {
-    read -p "$(echo -e ${green}"? ignore (y/n): "${black})" ignore;
-    if [ ${ignore} == "y" ];
-    then
-      echo "ignored"
-    else
-    #// }
-      exit 1
-    #// gINSERT
-    fi
-  fi
-fi
-if [ -f "$MOUNT_POINT" ];
-then
-    echo "Error: $MOUNT_POINT already exists!"
-    exit 1
-fi
-sudo mkdir "$MOUNT_POINT"
-# Fail on error
-# gCOMMENT to test for a return code on decryption failure
-#set -e
-# Print every step we execute
-set -x
-# Do it
-#// gCOMMENT left single quotes aren't working as expected in bash, in sh, they execute
-LO_MOUNT=`losetup -f`
-VG_MOUNT=`date +%s | sha1sum | head -c 8`
-#// gMODIFY
-#sudo losetup $LO_MOUNT "disks/$disk_name.disk"
-sudo losetup $LO_MOUNT "${disk_dir}/${disk_name}"
-#// gINSERT
-decryptOk=false
+mount=true
 
-while [ ${decryptOk} == "false" ]; do
-  echo -e "\ndecrypting...\n"
+while [ ${mount} == "true" ]; do
+  #// }
+  #// gCOMMENT {
+  #if [ ! -f "${key_file}" ];
+  #then
+  #    echo "Error: ${key_file} could not be found!"
+  #    exit 1
+  #fi
+  #if [ ! -n "$disk_name" ];
+  #then
+  #    echo "Usage: $0 disk-name [mount-point] <auto>"
+  #    exit 1
+  #fi
+  #if [ ! -n "$MOUNT_POINT" ];
+  #then
+  #    echo "Warning: No MOUNT_POINT env var set. Using $HOME/mounted-$disk_name"
+  #    MOUNT_POINT="$HOME/mounted-$disk_name"
+  #fi
+  #if [ ! -f "${disk_dir}/$disk_name.disk" ];
+  #then
+  #    echo "Error: $disk_name could not be found!"
+  #    exit 1
+  #fi
+  # }
+  # gCOMMENT {
+  #if [ ! -f "disks/$disk_name.key.gpg" ];
+  #then
+  #    echo "Error: Key for $disk_name could not be found!"
+  #    exit 1
+  #fi
+  #// }
   #// gMODIFY
-  #// gCOMMENT asymmetric encryption
-  #gpg --no-default-keyring --secret-keyring keyrings/secret.gpg --keyring keyrings/public.gpg --trustdb-name keyrings/trustdb.gpg --decrypt "disks/$disk_name.key.gpg" | sudo cryptsetup luksOpen $LO_MOUNT $VG_MOUNT -d -
-  if [ ${no_key} ]; then 
-    #// gCOMMENT symmetric encryption
-    #sudo cryptsetup create $VG_MOUNT $LO_MOUNT
-    sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
-  else
-    #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
-    eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
-  fi
-  if [ ${returnCode} == 0 ]; then 
-    decryptOk=true
-    #// gINSERT
-    sudo cryptsetup status $VG_MOUNT; (echo "return code: ${?}")
-    sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"; returnCode=${?}; (echo "return code: ${?}")
-    #// gINSERT {
-    if [ ${returnCode} == 0 ]; then
-      #// gINSERT }
-      #// gMODIFY
-      #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
-      echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/${disk_name}.mounted"
-      #// gINSERT
-      sudo chown -R "$USER:$USER" "$MOUNT_POINT"
-      sudo -k
+  #if [ -f "disks/$disk_name.mounted" ];
+  if [ -f "${disk_dir}/${disk_name}.mounted" ];
+  then
+    if [ "$3" == "auto" ];
+    then
+      exit 0
     else
-      echo "  ERROR: mount failure"
-    fi
-    echo -e "\n  ** successful disk mount ** \n"
-    echo -e "$(echo -e ${GREEN}"  ? ready to unmount: "${BLACK})" 
-    
-    select unmount in "yes" "quit"; do
-      case ${unmount} in
-        yes ) sh unmount-disk.sh ${disk_dir} ${disk_name}; break;;
-        quit ) exit;;
-      esac
-    done
-    
-  else
-    zenity --question --text="decryption attempt failed, try again?"; returnCode=${?}
-    if [ ${returnCode} == 1 ]; then
-      exit 1
+      #// gMODIFY
+      #echo "Error: Disk $disk_name is already mounted!"
+      echo "Warning: Disk ${disk_name} may already be mounted!"
+      #// gINSERT {
+      read -p "$(echo -e ${green}"? ignore (y/n): "${black})" ignore;
+      if [ ${ignore} == "y" ];
+      then
+        echo "ignored"
+      else
+      #// }
+        exit 1
+      #// gINSERT
+      fi
     fi
   fi
-done
+  if [ -f "$MOUNT_POINT" ];
+  then
+      echo "Error: $MOUNT_POINT already exists!"
+      exit 1
+  fi
+  sudo mkdir "$MOUNT_POINT"
+  # Fail on error
+  # gCOMMENT to test for a return code on decryption failure
+  #set -e
+  # Print every step we execute
+  set -x
+  # Do it
+  #// gCOMMENT left single quotes aren't working as expected in bash, in sh, they execute
+  LO_MOUNT=`losetup -f`
+  VG_MOUNT=`date +%s | sha1sum | head -c 8`
+  #// gMODIFY
+  #sudo losetup $LO_MOUNT "disks/$disk_name.disk"
+  sudo losetup $LO_MOUNT "${disk_dir}/${disk_name}"
+  #// gINSERT
+  decryptOk=false
+
+  while [ ${decryptOk} == "false" ]; do
+    echo -e "\ndecrypting...\n"
+    #// gMODIFY
+    #// gCOMMENT asymmetric encryption
+    #gpg --no-default-keyring --secret-keyring keyrings/secret.gpg --keyring keyrings/public.gpg --trustdb-name keyrings/trustdb.gpg --decrypt "disks/$disk_name.key.gpg" | sudo cryptsetup luksOpen $LO_MOUNT $VG_MOUNT -d -
+    if [ ${no_key} ]; then 
+      #// gCOMMENT symmetric encryption
+      #sudo cryptsetup create $VG_MOUNT $LO_MOUNT
+      sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
+    else
+      #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
+      eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
+    fi
+    if [ ${returnCode} == 0 ]; then 
+      decryptOk=true
+      #// gINSERT
+      sudo cryptsetup status $VG_MOUNT; (echo "return code: ${?}")
+      sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"; returnCode=${?}; (echo "return code: ${?}")
+      #// gINSERT {
+      if [ ${returnCode} == 0 ]; then
+        #// gINSERT }
+        #// gMODIFY
+        #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
+        echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/${disk_name}.mounted"
+        #// gINSERT
+        sudo chown -R "$USER:$USER" "$MOUNT_POINT"
+        sudo -k
+      else
+        echo "  ERROR: mount failure"
+      fi
+      set +x
+      echo -e "\n  ** successful disk mount ** \n"
+      echo -e "$(echo -e ${GREEN}"\n  ? ready to unmount disk: "${BLACK})\n" 
+      
+      select unmount in "yes" "quit"; do
+        case ${unmount} in
+          yes ) sh unmount-disk.sh ${disk_dir} ${disk_name}; break;;
+          quit ) exit;;
+        esac
+      done
+      
+      echo -e "$(echo -e ${GREEN}"\n  ? re-mount disk: "${BLACK})\n" 
+      echo -e "    NOTE: key file access is required"
+      
+      select remount in "yes" "quit"; do
+        case ${unmount} in
+          yes ) mount=true ; break;;
+          quit ) exit;;
+        esac
+      done
+      
+    else
+      zenity --question --text="decryption attempt failed, try again?"; returnCode=${?}
+      if [ ${returnCode} == 1 ]; then
+        exit 1
+      fi
+    fi
+  done
+  
+done # mount
 

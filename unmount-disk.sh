@@ -84,24 +84,34 @@ set -e
 #if [ ! -f "disks/$DISK_NAME.mounted" ];
 if [ ! -f "${disk_dir}/$disk_name.mounted" ];
 then
-    echo "Disk $disk_name was not mounted!"
+    echo "Disk ${disk_name} was not mounted!"
     exit -1
 fi
 #// gINSERT
 set -x
 #// gMODIFY
 #MOUNT_INFO="`cat "disks/$DISK_NAME.mounted"`"
-MOUNT_INFO="`cat "${disk_dir}/$disk_name.mounted"`"
-LO_MOUNT="`echo $MOUNT_INFO | awk -F":" '{print $1}'`"
-VG_MOUNT="`echo $MOUNT_INFO | awk -F":" '{print $2}'`"
-MOUNT_POINT="`echo $MOUNT_INFO | awk -F":" '{print $3}'`"
-sudo umount "$MOUNT_POINT"
+MOUNT_INFO="`cat "${disk_dir}/${disk_name}.mounted"`"
+LO_MOUNT="`echo ${MOUNT_INFO} | awk -F":" '{print $1}'`"
+VG_MOUNT="`echo ${MOUNT_INFO} | awk -F":" '{print $2}'`"
+MOUNT_POINT="`echo ${MOUNT_INFO} | awk -F":" '{print $3}'`"
+unmountOk=false
+
+while [ ${decryptOk} == "false" ]; do
+  sudo umount "${MOUNT_POINT}" ; returnCode=${?}
+  if [ ${returnCode} == 0 ]; then
+    unmountOk=true
+  else
+    echo "  ERROR: unmount failure"
+  fi
+done
+
 # gMODIFY
 #sudo cryptsetup luksClose /dev/mapper/$VG_MOUNT
-sudo cryptsetup close /dev/mapper/$VG_MOUNT
-sudo losetup --detach $LO_MOUNT
+sudo cryptsetup close /dev/mapper/${VG_MOUNT}
+sudo losetup --detach ${LO_MOUNT}
 #// gMODIFY
 #rm -f "disks/$DISK_NAME.mounted"
-rm -f "${disk_dir}/$disk_name.mounted"
-sudo rmdir "$MOUNT_POINT"
+rm -f "${disk_dir}/${disk_name}.mounted"
+sudo rmdir "${MOUNT_POINT}"
 sudo -k
