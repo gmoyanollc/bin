@@ -97,12 +97,13 @@ VG_MOUNT="`echo ${MOUNT_INFO} | awk -F":" '{print $2}'`"
 MOUNT_POINT="`echo ${MOUNT_INFO} | awk -F":" '{print $3}'`"
 unmountOk=false
 
-while [ ${decryptOk} == "false" ]; do
+while [ ${unmountOk} == "false" ]; do
   sudo umount "${MOUNT_POINT}" ; returnCode=${?}
   if [ ${returnCode} == 0 ]; then
     unmountOk=true
   else
-    echo "  ERROR: unmount failure"
+    echo -e "\n  ERROR: unmount failure\n"
+    read -p "$(echo -e ${green}"  press any key to try again... "${black})";
   fi
 done
 
