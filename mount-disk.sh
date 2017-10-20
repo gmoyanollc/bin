@@ -238,6 +238,7 @@ while [ ${mount} == "true" ]; do
       sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"; returnCode=${?}; (echo "return code: ${?}")
       #// gINSERT {
       if [ ${returnCode} == 0 ]; then
+        echo -e "\n  ** successful disk mount ** \n"
         #// gINSERT }
         #// gMODIFY
         #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
@@ -246,11 +247,10 @@ while [ ${mount} == "true" ]; do
         sudo chown -R "$USER:$USER" "$MOUNT_POINT"
         sudo -k
       else
-        echo "  ERROR: mount failure"
+        echo -e "\n  ERROR: mount failure\n"
+        exit
       fi
-      set +x
-      echo -e "\n  ** successful disk mount ** \n"
-      echo -e "$(echo -e ${GREEN}"\n  ? ready to unmount disk: "${BLACK})\n" 
+      echo -e "$(echo -e ${GREEN}"  ? ready to unmount disk: "${BLACK})\n" 
       
       select unmount in "yes" "quit"; do
         case ${unmount} in
@@ -265,7 +265,7 @@ while [ ${mount} == "true" ]; do
       select remount in "yes" "quit"; do
         case ${unmount} in
           yes ) mount=true ; break;;
-          quit ) exit;;
+          quit ) mount=false ; break;;
         esac
       done
       

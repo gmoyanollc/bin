@@ -101,8 +101,9 @@ while [ ${unmountOk} == "false" ]; do
   sudo umount "${MOUNT_POINT}" ; returnCode=${?}
   if [ ${returnCode} == 0 ]; then
     unmountOk=true
+    echo -e "\n  ** successful disk unmount ** \n"
   else
-    echo -e "\n  ERROR: unmount failure\n"
+    echo -e "\n  ERROR: disk unmount failure\n"
     read -p "$(echo -e ${green}"  press any key to try again... "${black})";
   fi
 done
