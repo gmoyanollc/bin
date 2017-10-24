@@ -42,7 +42,7 @@ while [ ${dirOk} == "false" ]; do
   fi
   if [ -d "${disk_dir}" ]; then
     dirOk=true
-    ls -1 ${disk_dir}
+    ls -1 "${disk_dir}"
   else
     echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
     set -- "" "${@:2}"

@@ -58,7 +58,7 @@ while [ ${dirOk} == "false" ]; do
   fi
   if [ -d "${disk_dir}" ]; then
     dirOk=true
-    ls -1 ${disk_dir}
+    ls -1 "${disk_dir}"
   else
     echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
     set -- "${@:1}" ""
@@ -254,7 +254,7 @@ while [ ${mount} == "true" ]; do
       
       select unmount in "yes" "quit"; do
         case ${unmount} in
-          yes ) sh unmount-disk.sh ${disk_dir} ${disk_name}; break;;
+          yes ) sh unmount-disk.sh "${disk_dir}" "${disk_name}"; break;;
           quit ) exit;;
         esac
       done
@@ -263,7 +263,7 @@ while [ ${mount} == "true" ]; do
       echo -e "    NOTE: key file access is required"
       
       select remount in "yes" "quit"; do
-        case ${unmount} in
+        case ${remount} in
           yes ) mount=true ; break;;
           quit ) mount=false ; break;;
         esac
