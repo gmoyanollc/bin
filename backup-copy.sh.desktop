@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=x.y
+Name=backup-copy.sh
+Comment=
+Exec=backup-copy.sh
+Icon=
+Terminal=true
+Type=Application
+Categories=Utility;Application;
+Name[en_US]=backup-copy.sh
