@@ -1,7 +1,6 @@
 [Desktop Entry]
-Version=x.y
 Name=backup-copy.sh
-Comment=
+Comment=backup a file by copying 
 Exec=backup-copy.sh
 Icon=
 Terminal=true

@@ -1,7 +1,6 @@
 [Desktop Entry]
-Version=x.y
 Name=mount-disk.sh
-Comment=
+Comment=mount an asynchronously encrypted virtual partition file
 Exec=mount-disk.sh
 Icon=
 Terminal=true
