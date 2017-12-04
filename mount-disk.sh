@@ -74,8 +74,8 @@ while [ ${fileOk} == "false" ]; do
     ls -1 "${disk_dir}/${disk_name}"
   else
     echo -e "\nERROR: file ${disk_dir}/${disk_name} could not be found!\n"
-    #read -p "press any key to select another disk file"
-    #exit 1
+    echo ${disk_dir}/${disk_name}
+    ls -1 "${disk_dir}/${disk_name}"
   fi
 done
   
