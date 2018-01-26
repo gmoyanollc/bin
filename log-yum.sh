@@ -4,7 +4,7 @@ if [ ${#} -eq 3 ]; then
 	yum_command=${1}
 	package=${2}
 	log_label=${3}
-  log_dir=~/log-yum-logs
+  log_dir=~/yum-logs
   if [ ! -d "$log_dir" ]; then
     mkdir ${log_dir}
   fi
