@@ -47,34 +47,39 @@ SYSTEM_MOUNT_POINT="/media"
 green="\033[32m"
 black="\033[0m"
 dirOk=false
+tryAgainDiskDir=false
 
-while [ ${dirOk} == "false" ]; do
-  if [ "${1}" == "" ]; then
-    find "${HOME}" -maxdepth 1 -type d 
-    find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d 
-    read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
-  else
-    disk_dir="${1}"
+while [ "${dirOk}" == "false" ]; do
+  if [ ! "${tryAgainDiskDir}" == "true" ]; then
+    if [ "${1}" == "" ]; then
+      find "${HOME}" -maxdepth 1 -type d 
+      find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d 
+      #read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
+    else
+      disk_dir="${1}"
+    fi
   fi
+  read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
   if [ -d "${disk_dir}" ]; then
     dirOk=true
     ls -1 "${disk_dir}"
   else
     echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
+    tryAgainDiskDir=true
     set -- "${@:1}" ""
   fi
 done
 
 fileOk=false
 
-while [ ${fileOk} == "false" ]; do
+while [ "${fileOk}" == "false" ]; do
   read -p "$(echo -e ${green}"? disk file: "${black})" disk_name;
   if [ -f "${disk_dir}/${disk_name}" ]; then
     fileOk=true
     ls -1 "${disk_dir}/${disk_name}"
   else
     echo -e "\nERROR: file ${disk_dir}/${disk_name} could not be found!\n"
-    echo ${disk_dir}/${disk_name}
+    echo "${disk_dir}/${disk_name}"
     ls -1 "${disk_dir}/${disk_name}"
   fi
 done
@@ -85,33 +90,42 @@ set -x
 #disk_name=$1
 #// gMODIFY
 #MOUNT_POINT=$2
-MOUNT_POINT=${USER_MOUNT_POINT}/${USER}/${disk_name}
+MOUNT_POINT="${USER_MOUNT_POINT}/${USER}/${disk_name}"
 #// gINSERT {
 set +x
 dirOk=false
+tryAgainKeyDir=false
 
-while [ ${dirOk} == "false" ]; do
-  find ${USER_MOUNT_POINT}/${USER}/* -maxdepth 2 -type d
-  read -p "$(echo -e ${green}"? key dir ('n/a' for no key): "${black})" key_dir;
+while [ "${dirOk}" == "false" ]; do
+  if [ ! "${tryAgainKeyDir}" == "true" ]; then
+    find "${USER_MOUNT_POINT}/${USER}/"* -maxdepth 2 -type d
+  fi
+  read -p "$(echo -e ${green}"? key dir ('n/a' == no key): "${black})" key_dir;
   if [ "${key_dir}" == "n/a" ]; then 
     no_key=0
   else
     if [ -d "${key_dir}" ]; then
       dirOk=true
-      eval "ls -1 '${key_dir}'"
+      #eval "ls -1 '${key_dir}'"
+      ls -1 "${key_dir}"
     else
       echo -e "\nERROR: directory ${key_dir} could not be found!\n"
       #read -p "press any key to select another key directory"
       #exit 1
+      tryAgainKeyDir=true
     fi
+  fi
+done
+
+  if [ ! "${no_key}" ]; then
     fileOk=false
 
-    while [ ${fileOk} == "false" ]; do
+    while [ "${fileOk}" == "false" ]; do
       read -p "$(echo -e ${green}"? key file: "${black})" key_name;
       if [ -f "${key_dir}/${key_name}" ]; then
         fileOk=true
         ls -1 "${key_dir}/${key_name}"
-        key_file=${key_dir}/${key_name}
+        key_file="${key_dir}/${key_name}"
       else
         echo -e "\nERROR: file ${key_dir}/${key_name} could not be found!\n"
         #read -p "press any key to select another key file"
@@ -120,7 +134,8 @@ while [ ${dirOk} == "false" ]; do
     done
 
     fileOk=false
-    while [ ${fileOk} == "false" ]; do
+
+    while [ "${fileOk}" == "false" ]; do
       read -p "$(echo -e ${green}"? pin file: "${black})" pin_name;
       if [ -f "${key_dir}/${pin_name}" ]; then
         fileOk=true
@@ -130,7 +145,7 @@ while [ ${dirOk} == "false" ]; do
         #cypher="$(gpg -q -d ${pin_file})"
         #cypher=eval "gpg -q -d '${pin_file}'"
         # disable the ui prompt
-        cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"
+        cypher="$(GPG_AGENT_INFO='' gpg -q -d ${pin_file})"
       else
         echo -e "\nERROR: file ${key_dir}/${pin_name} could not be found!\n"
         #read -p "press any key to select another pin file"
@@ -139,11 +154,11 @@ while [ ${dirOk} == "false" ]; do
     done
     
   fi
-done
+#done
 
 mount=true
 
-while [ ${mount} == "true" ]; do
+while [ "${mount}" == "true" ]; do
   #// }
   #// gCOMMENT {
   #if [ ! -f "${key_file}" ];
@@ -187,7 +202,7 @@ while [ ${mount} == "true" ]; do
       echo "Warning: Disk ${disk_name} may already be mounted!"
       #// gINSERT {
       read -p "$(echo -e ${green}"? ignore (y/n): "${black})" ignore;
-      if [ ${ignore} == "y" ];
+      if [ "${ignore}" == "y" ];
       then
         echo "ignored"
       else
@@ -218,7 +233,7 @@ while [ ${mount} == "true" ]; do
   #// gINSERT
   decryptOk=false
 
-  while [ ${decryptOk} == "false" ]; do
+  while [ "${decryptOk}" == "false" ]; do
     echo -e "\ndecrypting...\n"
     #// gMODIFY
     #// gCOMMENT asymmetric encryption
