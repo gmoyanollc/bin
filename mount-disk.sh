@@ -40,8 +40,6 @@
 # // George Moyano under the aforementioned terms.
 # }
 
-# Configuration
-#// gINSERT {
 USER_MOUNT_POINT="/run/media"
 SYSTEM_MOUNT_POINT="/media"
 green="\033[32m"
@@ -74,7 +72,7 @@ fileOk=false
 
 while [ "${fileOk}" == "false" ]; do
   read -p "$(echo -e ${green}"? disk file: "${black})" disk_name;
-  if [ -f "${disk_dir}/${disk_name}" ]; then
+  if [ -e "${disk_dir}/${disk_name}" ]; then
     fileOk=true
     ls -1 "${disk_dir}/${disk_name}"
   else
@@ -85,13 +83,7 @@ while [ "${fileOk}" == "false" ]; do
 done
   
 set -x
-#}
-#// gCOMMENT
-#disk_name=$1
-#// gMODIFY
-#MOUNT_POINT=$2
 MOUNT_POINT="${USER_MOUNT_POINT}/${USER}/${disk_name}"
-#// gINSERT {
 set +x
 dirOk=false
 tryAgainKeyDir=false
@@ -106,7 +98,6 @@ while [ "${dirOk}" == "false" ]; do
   else
     if [ -d "${key_dir}" ]; then
       dirOk=true
-      #eval "ls -1 '${key_dir}'"
       ls -1 "${key_dir}"
     else
       echo -e "\nERROR: directory ${key_dir} could not be found!\n"
@@ -122,7 +113,7 @@ done
 
     while [ "${fileOk}" == "false" ]; do
       read -p "$(echo -e ${green}"? key file: "${black})" key_name;
-      if [ -f "${key_dir}/${key_name}" ]; then
+      if [ -e "${key_dir}/${key_name}" ]; then
         fileOk=true
         ls -1 "${key_dir}/${key_name}"
         key_file="${key_dir}/${key_name}"
@@ -137,7 +128,7 @@ done
 
     while [ "${fileOk}" == "false" ]; do
       read -p "$(echo -e ${green}"? pin file: "${black})" pin_name;
-      if [ -f "${key_dir}/${pin_name}" ]; then
+      if [ -e "${key_dir}/${pin_name}" ]; then
         fileOk=true
         ls -1 "${key_dir}/${pin_name}"
         pin_file=${key_dir}/${pin_name}
@@ -145,7 +136,7 @@ done
         #cypher="$(gpg -q -d ${pin_file})"
         #cypher=eval "gpg -q -d '${pin_file}'"
         # disable the ui prompt
-        cypher="$(GPG_AGENT_INFO='' gpg -q -d ${pin_file})"
+        cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"
       else
         echo -e "\nERROR: file ${key_dir}/${pin_name} could not be found!\n"
         #read -p "press any key to select another pin file"
@@ -159,64 +150,24 @@ done
 mount=true
 
 while [ "${mount}" == "true" ]; do
-  #// }
-  #// gCOMMENT {
-  #if [ ! -f "${key_file}" ];
-  #then
-  #    echo "Error: ${key_file} could not be found!"
-  #    exit 1
-  #fi
-  #if [ ! -n "$disk_name" ];
-  #then
-  #    echo "Usage: $0 disk-name [mount-point] <auto>"
-  #    exit 1
-  #fi
-  #if [ ! -n "$MOUNT_POINT" ];
-  #then
-  #    echo "Warning: No MOUNT_POINT env var set. Using $HOME/mounted-$disk_name"
-  #    MOUNT_POINT="$HOME/mounted-$disk_name"
-  #fi
-  #if [ ! -f "${disk_dir}/$disk_name.disk" ];
-  #then
-  #    echo "Error: $disk_name could not be found!"
-  #    exit 1
-  #fi
-  # }
-  # gCOMMENT {
-  #if [ ! -f "disks/$disk_name.key.gpg" ];
-  #then
-  #    echo "Error: Key for $disk_name could not be found!"
-  #    exit 1
-  #fi
-  #// }
-  #// gMODIFY
-  #if [ -f "disks/$disk_name.mounted" ];
-  if [ -f "${disk_dir}/${disk_name}.mounted" ];
-  then
-    if [ "$3" == "auto" ];
-    then
+  if [ -e "${disk_dir}/${disk_name}.mounted" ] || [ -d "${MOUNT_POINT}" ]; then
+    if [ "$3" == "auto" ]; then
       exit 0
     else
-      #// gMODIFY
-      #echo "Error: Disk $disk_name is already mounted!"
+      ls -1 "${MOUNT_POINT}"
       echo "Warning: Disk ${disk_name} may already be mounted!"
-      #// gINSERT {
       read -p "$(echo -e ${green}"? ignore (y/n): "${black})" ignore;
-      if [ "${ignore}" == "y" ];
-      then
+      if [ "${ignore}" == "y" ]; then
         echo "ignored"
       else
-      #// }
         exit 1
-      #// gINSERT
       fi
     fi
   fi
-  if [ -f "$MOUNT_POINT" ];
-  then
-      echo "Error: $MOUNT_POINT already exists!"
-      exit 1
-  fi
+  #if [ -d "$MOUNT_POINT" ]; then
+  #    echo "Error: $MOUNT_POINT already exists!"
+  #    exit 1
+  #fi
   sudo mkdir "$MOUNT_POINT"
   # Fail on error
   # gCOMMENT to test for a return code on decryption failure
@@ -227,10 +178,7 @@ while [ "${mount}" == "true" ]; do
   #// gCOMMENT left single quotes aren't working as expected in bash, in sh, they execute
   LO_MOUNT=`losetup -f`
   VG_MOUNT=`date +%s | sha1sum | head -c 8`
-  #// gMODIFY
-  #sudo losetup $LO_MOUNT "disks/$disk_name.disk"
   sudo losetup $LO_MOUNT "${disk_dir}/${disk_name}"
-  #// gINSERT
   decryptOk=false
 
   while [ "${decryptOk}" == "false" ]; do
@@ -248,17 +196,11 @@ while [ "${mount}" == "true" ]; do
     fi
     if [ ${returnCode} == 0 ]; then 
       decryptOk=true
-      #// gINSERT
       sudo cryptsetup status $VG_MOUNT; (echo "return code: ${?}")
       sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"; returnCode=${?}; (echo "return code: ${?}")
-      #// gINSERT {
       if [ ${returnCode} == 0 ]; then
         echo -e "\n  ** successful disk mount ** \n"
-        #// gINSERT }
-        #// gMODIFY
-        #echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"disks/$disk_name.mounted"
-        echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" >"${disk_dir}/${disk_name}.mounted"
-        #// gINSERT
+        echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" > "${disk_dir}/${disk_name}.mounted"
         sudo chown -R "$USER:$USER" "$MOUNT_POINT"
         sudo -k
       else
