@@ -59,9 +59,9 @@ fi
 
 if [ "${3}" == "" ]; then
   MOUNT_POINT=${system_mount_point}/${USER}
-  set +x
+  #set +x
   find ${system_mount_point}/${USER}/* -maxdepth 2 -type d
-  set -x
+  #set -x
   read -p "$(echo -e ${green}"? target dir: "${black})" target_dir;
 else
   target_dir="${3}"
