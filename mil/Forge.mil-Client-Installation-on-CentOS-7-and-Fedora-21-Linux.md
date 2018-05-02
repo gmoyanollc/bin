@@ -1,91 +1,22 @@
-#Forge.mil Client Installation on CentOS-7 and Fedora-21 Linux
-Forge.mil has a PKI-enabled client called ForgeSCMC (Forge Source Code Management Client).  On Linux, the installation may take the following general steps if the system is not already using PKCS#11 with a smartcard reader:
+# Forge.mil Client Installation on CentOS-7 and Fedora-21 Linux
+Forge.mil has a PKI-enabled client called ForgeSCMC (Forge Source Code Management Client).  
 
-  1) Download U.S. Federal Government certificates
-  
-  2) Install PKCS#11 software provider
-  
-  3) Install smartcard reader software
-  
-  4) Add browser PKCS#11 module and import certificates
-  
-  5) Install ForgeSCMC
-  
-##Download U.S. Federal Government certificates
+To configure a smartcard reader for PKCS#11 on Centos, see [Smart-Card-Reader-PKCS-11-on-CentOS-7-Linux] (./Smart-Card-Reader-PKCS-11-on-CentOS-7-Linux.md) or (https://github.com/gmoyanollc/bin/blob/master/mil/Smart-Card-Reader-PKCS-11-on-CentOS-7-Linux.md):
 
-  1) Download [DoD Root and Intermediate CA Certificates](http://iase.disa.mil/pki-pke/Documents/unclass-installroot_v3-16-1a.zip)
-
-##Install PKCS#11 provider
-
-  1) Download [CACKey](http://cackey.rkeene.org/fossil/wiki?name=Downloads)
+# Install ForgeSCMC
   
-  2) Install from the downloaded package
-```  
-    sudo yum install ~/Downloads/cackey-0.6.8-3522.x86_64.rpm
-``` 
-  3) List the files.
-```
-    ls /usr/lib64/libcackey*
-```
-
-##Install smartcard reader software
-
-  1) Install from the system repository
-```  
-    sudo yum install pcsc-lite
-```  
-  2) Start the daemon
-```
-    sudo pcscd
-```
-  3) Check if it is running 
-```
-    ps aux | grep pcscd
-```
-##Add browser PKCS#11 module and import certificates
-
-  1) Open browser's certificate configuration page
-```
-    Firefox/Preferences/Advanced/Certificates
-```
-  2) Add a PKCS#11 Device
-  ```
-    Firefox/Preferences/Advanced/Certificates/Security Devices/Load
-  ```
-  3) Add a PKCS#11 Device module provider
-  ```
-    Module Name: CACKey PKCS#11 Module
-    Module filename: /usr/lib64/libcackey.so
-  ```
-  4) View and Import Authority Certificates
-  ```
-    Firefox/Preferences/Advanced/Certificates/View Certificates/Authorities/Import
-  ```
-  5) Select and trust US Government Authority Certificate file
-  ```
-    Certificates_PKCS7_v4.0.1_DoD.der.p7b
-  ```
-  6) View U.S. Government Authority Certificates
-  ```
-    Firefox/Preferences/Advanced/Certificates/View Certificates/Authorities/Certificate Name/U.S. Government
-  ```
-  7) Browse to Forge.mil project [ForgeSCMC](https://software.forge.mil/sf/go/projects.git-gerrit/frs.forgescmc)
+  1. Download [ForgeSCMC](https://software.forge.mil/sf/go/projects.git-gerrit/frs.forgescmc)
   
-##Install ForgeSCMC
-  
-  1) Download [ForgeSCMC](https://software.forge.mil/sf/go/projects.git-gerrit/frs.forgescmc)
-  
-  2) Install from the downloaded package
+  2. Install the downloaded package
 ```
-    sudo yum install ForgeSCMC-linux-amd64_1.2.2.rpm
+    $ sudo yum install ForgeSCMC-linux-amd64_1.3.3.rpm
 ```
-  2) Select and open ForgeSCMC short-cut in menu system
+  3. Launch ForgeSCMC
+```
+    $ bash forgeSCMC.sh
+```
   
-#Additional Resources
-
-  * DISA: [Getting Started with Linux](http://iase.disa.mil/pki-pke/getting_started/Pages/linux.aspx)
-  
-  * DISA: [Getting Started with Firefox on Linux](http://iase.disa.mil/pki-pke/getting_started/Pages/linux-firefox.aspx)
+# Additional Resources
   
   * Forge.mil: [Support](https://software.forge.mil/sf/projects/support)
   
@@ -95,4 +26,6 @@ Forge.mil has a PKI-enabled client called ForgeSCMC (Forge Source Code Managemen
   
   * Forge.mil: [ForgeSCMC Configuration and Usage](https://software.forge.mil/sf/go/doc82684)
   
-
+# [George Moyano](https://onename.com/gmoyano)
+# @github/gmoyanollc
+# 2018-05-02 12:33:48 

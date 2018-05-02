@@ -179,6 +179,7 @@ while [ "${mount}" == "true" ]; do
   LO_MOUNT=`losetup -f`
   VG_MOUNT=`date +%s | sha1sum | head -c 8`
   sudo losetup $LO_MOUNT "${disk_dir}/${disk_name}"
+  returnCode=0
   decryptOk=false
 
   while [ "${decryptOk}" == "false" ]; do
@@ -209,19 +210,21 @@ while [ "${mount}" == "true" ]; do
       fi
       echo -e "$(echo -e ${GREEN}"  ? ready to unmount disk: "${BLACK})\n" 
       
-      select unmount in "yes" "quit"; do
+#      select unmount in "unmount" "quit"; do
+      select unmount in "unmount"; do
         case ${unmount} in
-          yes ) sh unmount-disk.sh "${disk_dir}" "${disk_name}"; break;;
-          quit ) exit;;
+          unmount ) sh unmount-disk.sh "${disk_dir}" "${disk_name}"; break;;
+#          quit ) exit;;
         esac
       done
       
       echo -e "$(echo -e ${GREEN}"\n  ? re-mount disk: "${BLACK})\n" 
       echo -e "    NOTE: key file access is required"
       
-      select remount in "yes" "quit"; do
+      select remount in "remount" "backup" "quit"; do
         case ${remount} in
-          yes ) mount=true ; break;;
+          remount ) mount=true ; break;;
+          backup ) mount=false; sh backup-copy.sh "${disk_dir}" "${disk_name}"; break;;
           quit ) mount=false ; break;;
         esac
       done
@@ -236,3 +239,6 @@ while [ "${mount}" == "true" ]; do
   
 done # mount
 
+# [George Moyano](https://onename.com/gmoyano)
+# @github/gmoyanollc
+# 2018-05-02 12:33:48 

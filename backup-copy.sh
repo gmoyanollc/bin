@@ -61,7 +61,7 @@ if [ "${3}" == "" ]; then
   MOUNT_POINT=${system_mount_point}/${USER}
   set +x
   find ${system_mount_point}/${USER}/* -maxdepth 2 -type d
-  set -x
+  #set -x
   read -p "$(echo -e ${green}"? target dir: "${black})" target_dir;
 else
   target_dir="${3}"
@@ -74,7 +74,7 @@ else
 fi
 
 date=$(date +%Y%m%d%H%M%S)
-cp -v ${source_dir}/${source_name} ${target_dir}/${source_name}-${date} &
+cp -v "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}" &
 pid=$! # Process Id of the previous running command
 echo -e "\ncopying...\n"
 spin='-\|/'
