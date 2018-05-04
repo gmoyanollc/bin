@@ -28,26 +28,43 @@
 # enable "dual-factor security - both the (encrypted) keyfile, 
 #   and your passphrase (to decrypt it) will be required to access..."
 
+USER_MOUNT_POINT="/run/media"
+SYSTEM_MOUNT_POINT="/media"
 green="\033[32m"
 black="\033[0m"
+dirOk=false
+#tryAgainKeyDir=false
 
-find ../* -maxdepth 0 -type d
-read -p "$(echo -e ${green}"? new key dir path: "${black})" key_dir;
-if [ -d "${key_dir}" ];
-then
-  ls -1 ${key_dir}
-else
-  echo "Error: ${key_dir} could not be found!"
-  exit 1
-fi
-read -p "$(echo -e ${green}"? key name (exclude '.gpg' suffix): "${black})" key_name;
+while [ "${dirOk}" == "false" ]; do
+  #if [ ! "${tryAgainKeyDir}" == "true" ]; then
+    if [ "${1}" == "" ]; then
+      find "${HOME}" -maxdepth 1 -type d 
+      find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d
+      read -p "$(echo -e ${green}"? new key dir path: "${black})" key_dir;
+    else
+      key_dir="${1}"
+    fi
+  #fi
+  if [ -d "${key_dir}" ]; then
+    dirOk=true
+    ls -1 "${key_dir}"
+  else
+      echo -e "\n  [ERROR] Directory ${key_dir} could not be found!\n"
+      read -p "  Press any key to try again.";
+      #tryAgainKeyDir=true
+      set -- "${@:1}" ""
+    #exit 1
+  fi
+done
+
+read -p "$(echo -e ${green}"? new key name (exclude '.gpg' suffix): "${black})" key_name;
 set -x
 export GPG_TTY=$(tty) 
-key_file=${key_dir}/${key_name}.gpg
+key_file="${key_dir}/${key_name}.gpg"
 # "the cryptsetup system can support keyfiles up to and including 8192KiB"
 # "in practice, due to a off-by-one bug, it supports only keyfiles strictly
 #   less than 8MiB. We therefore create a keyfile of length (1024 * 8192) - 1 = 8388607 bytes."
-dd if=/dev/urandom bs=8388607 count=1 | gpg --symmetric --cipher-algo AES256 --output ${key_file}
+dd if=/dev/urandom bs=8388607 count=1 | gpg --symmetric --cipher-algo AES256 --output "${key_file}"
 set +x
 if [ -f "${key_file}" ];
 then

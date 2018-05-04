@@ -45,25 +45,26 @@ SYSTEM_MOUNT_POINT="/media"
 green="\033[32m"
 black="\033[0m"
 dirOk=false
-tryAgainDiskDir=false
+#tryAgainDiskDir=false
 
 while [ "${dirOk}" == "false" ]; do
-  if [ ! "${tryAgainDiskDir}" == "true" ]; then
-    if [ "${1}" == "" ]; then
-      find "${HOME}" -maxdepth 1 -type d 
-      find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d 
-      #read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
-    else
-      disk_dir="${1}"
-    fi
+  #if [ ! "${tryAgainDiskDir}" == "true" ]; then
+  if [ "${1}" == "" ]; then
+    find "${HOME}" -maxdepth 1 -type d 
+    find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d 
+    read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
+  else
+    disk_dir="${1}"
   fi
-  read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
+  #fi
+  #read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
   if [ -d "${disk_dir}" ]; then
     dirOk=true
     ls -1 "${disk_dir}"
   else
     echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
-    tryAgainDiskDir=true
+    read -p "  Press any key to try again.";
+    #tryAgainDiskDir=true
     set -- "${@:1}" ""
   fi
 done
@@ -86,12 +87,12 @@ set -x
 MOUNT_POINT="${USER_MOUNT_POINT}/${USER}/${disk_name}"
 set +x
 dirOk=false
-tryAgainKeyDir=false
+#tryAgainKeyDir=false
 
 while [ "${dirOk}" == "false" ]; do
-  if [ ! "${tryAgainKeyDir}" == "true" ]; then
-    find "${USER_MOUNT_POINT}/${USER}/"* -maxdepth 2 -type d
-  fi
+  #if [ ! "${tryAgainKeyDir}" == "true" ]; then
+  find "${USER_MOUNT_POINT}/${USER}/"* -maxdepth 2 -type d
+  #fi
   read -p "$(echo -e ${green}"? key dir ('n/a' == no key): "${black})" key_dir;
   if [ "${key_dir}" == "n/a" ]; then 
     no_key=0
@@ -101,9 +102,9 @@ while [ "${dirOk}" == "false" ]; do
       ls -1 "${key_dir}"
     else
       echo -e "\nERROR: directory ${key_dir} could not be found!\n"
-      #read -p "press any key to select another key directory"
+      read -p "  Press any key to try again.";
       #exit 1
-      tryAgainKeyDir=true
+      #tryAgainKeyDir=true
     fi
   fi
 done
