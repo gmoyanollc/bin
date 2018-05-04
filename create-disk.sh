@@ -24,46 +24,77 @@
 
 # source: https://wiki.gentoo.org/wiki/Sakaki%27s_EFI_Install_Guide/Preparing_the_LUKS-LVM_Filesystem_and_Boot_USB_Key
 
-green="\033[32m"
-black="\033[0m"
-reg_exp_int="[0-9]+"
-system_mount_point="/run/media"
+USER_MOUNT_POINT="/run/media"
+SYSTEM_MOUNT_POINT="/media"
+GREEN="\033[32m"
+BLACK="\033[0m"
+REG_EXP_INT="[0-9]+"
 
-find ${HOME} -maxdepth 1 -type d
-read -p "$(echo -e ${green}"? new disk dir path: "${black})" disk_dir;
-if [ -d "${disk_dir}" ];
-then
-  ls -1d ${disk_dir}
-else
-  echo "  ERROR: ${disk_dir} could not be found!"
-  exit 1
-fi
-read -p "$(echo -e ${green}"? new disk name (exclude '.img.disk' suffix): "${black})" disk_name;
-find ${system_mount_point}/${USER} -maxdepth 2 -type d
-read -p "$(echo -e ${green}"? key dir path: "${black})" key_dir
-if [ -d "${key_dir}" ];
-then
-  eval "ls -1 '${key_dir}'"
-else
-  echo "  ERROR: ${key_dir} could not be found!"
-  exit 1
-fi
-read -p "$(echo -e ${green}"? key name: "${black})" key_name
-if [ -f "${key_dir}/${key_name}" ];
-then
-  ls -1 "${key_dir}/${key_name}"
-else
-  echo "  ERROR: ${key_dir}/${key_name} could not be found!"
-  exit 1;
-fi
-read -p "$(echo -e ${green}"? file size in gigabytes (exclude 'G' suffix): "${black})" file_size
-if ! [[ "${file_size}" =~ (${reg_exp_int}) ]];
-then
-  echo "  ERROR - not an integer: ${file_size}"
-  exit 1
-else
-  echo "  INFO - match an integer: ${BASH_REMATCH[1]}, ${file_size}"
-fi
+dirOk=false
+
+while [ "${dirOk}" == "false" ]; do
+  if [ "${1}" == "" ]; then
+    find "${HOME}" -maxdepth 1 -type d 
+    find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d
+    read -p "$(echo -e ${GREEN}"? new disk dir path: "${BLACK})" disk_dir;
+  else
+    key_dir="${1}"
+  fi
+  if [ -d "${disk_dir}" ]; then
+    dirOk=true
+    ls -1d "${disk_dir}"
+  else
+    echo -e "\n  [ERROR] Directory ${disk_dir} could not be found!\n"
+    read -p "  Press any key to try again.";
+    set -- "${@:1}" ""
+    #exit 1
+  fi
+done
+
+read -p "$(echo -e ${GREEN}"? new disk name (exclude '.img.disk' suffix): "${BLACK})" disk_name;
+dirOk=false
+
+while [ "${dirOk}" == "false" ]; do
+  find "${SYSTEM_MOUNT_POINT}/${USER}" -maxdepth 2 -type d
+  read -p "$(echo -e ${GREEN}"? key dir path: "${BLACK})" key_dir
+  if [ -d "${key_dir}" ]; then
+    dirOk=true
+    ls -1 "${key_dir}"
+  else
+    echo -e "\n  [ERROR] Directory ${key_dir} could not be found!\n"
+    read -p "  Press any key to try again.";
+    #exit 1
+  fi
+done
+
+fileOk=false
+
+while [ "${fileOk}" == "false" ]; do
+  read -p "$(echo -e ${GREEN}"? key name: "${BLACK})" key_name
+  if [ -f "${key_dir}/${key_name}" ];
+  then
+    fileOk=true
+    ls -1 "${key_dir}/${key_name}"
+  else
+    echo "\n  [ERROR] ${key_dir}/${key_name} could not be found!\n"
+    #exit 1;
+  fi
+done
+
+fileSizeOk=false
+
+while [ "${fileSizeOk}" == "false" ]; do
+  read -p "$(echo -e ${GREEN}"? file size in gigabytes (exclude 'G' suffix): "${BLACK})" file_size
+#  if ! [[ "${file_size}" =~ (${REG_EXP_INT}) ]]; then
+  if [[ "${file_size}" =~ (${REG_EXP_INT}) ]]; then
+    fileSizeOk=true
+    echo "  [INFO] matched integer: ${BASH_REMATCH[1]}, ${file_size}"
+  else
+    echo "  [ERROR] not an integer: ${file_size}"
+    #exit 1
+  fi
+done
+
 set -x
 new_disk_file=${disk_dir}/${disk_name}.img.disk
 key_file=${key_dir}/${key_name}
@@ -84,7 +115,7 @@ dd of=${new_disk_file} bs=1G count=0 seek=${file_size} status=progress
 # gINSERT {
 LO_MOUNT=`losetup -f`
 VG_MOUNT=`date +%s | sha1sum | head -c 8`
-mount_point="${system_mount_point}/${USER}/${disk_name}"
+mount_point="${SYSTEM_MOUNT_POINT}/${USER}/${disk_name}"
 #}
 # gMODIFY
 #losetup /dev/loop0 /path/to/secretfs
@@ -157,7 +188,7 @@ fi
 # Mount the new filesystem in a convenient location
 #// gMODIFY
 #mkdir /mnt/cryptofs/secretfs
-sudo mkdir "${system_mount_point}/${USER}/${disk_name}"
+sudo mkdir "${SYSTEM_MOUNT_POINT}/${USER}/${disk_name}"
 # gINSERT {
 if [ ! ${returnCode} == 0 ]; then
   echo "  WARNING - return code: ${returnCode}"

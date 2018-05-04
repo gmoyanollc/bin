@@ -78,8 +78,8 @@ while [ "${fileOk}" == "false" ]; do
     ls -1 "${disk_dir}/${disk_name}"
   else
     echo -e "\nERROR: file ${disk_dir}/${disk_name} could not be found!\n"
-    echo "${disk_dir}/${disk_name}"
-    ls -1 "${disk_dir}/${disk_name}"
+    #echo "${disk_dir}/${disk_name}"
+    #ls -1 "${disk_dir}/${disk_name}"
   fi
 done
   
@@ -137,11 +137,20 @@ done
         #cypher="$(gpg -q -d ${pin_file})"
         #cypher=eval "gpg -q -d '${pin_file}'"
         # disable the ui prompt
-        cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"
+        #cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"; returnCode=${?}
       else
         echo -e "\nERROR: file ${key_dir}/${pin_name} could not be found!\n"
         #read -p "press any key to select another pin file"
         #exit 1
+      fi
+    done
+
+    cypherOk=false
+
+    while [ "${cypherOk}" == "false" ]; do
+      cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"; returnCode=${?}
+      if [ ${returnCode} == 0 ]; then
+        cypherOk=true
       fi
     done
     
