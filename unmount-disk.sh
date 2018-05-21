@@ -75,7 +75,7 @@ done
 #fi
 #// gCOMMENT-OUT }
 # Fail on error
-set -e
+#set -e
 # Print all commands on execution
 #// gCOMMENT
 #set -x
