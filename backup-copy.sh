@@ -24,13 +24,16 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 HELP="usage: ${0} source_dir source_name target_dir"
-system_mount_point="/run/media"
-green="\033[32m"
-black="\033[0m"
+#system_mount_point="/run/media"
+USER_MOUNT_POINT="/run/media"
+#SYSTEM_MOUNT_POINT="/media"
+GREEN="\033[32m"
+BLACK="\033[0m"
 
 if [ "${1}" == "" ]; then
   find ${HOME} -maxdepth 1 -type d 
-  read -p "$(echo -e ${green}"? source dir path: "${black})" source_dir;
+  find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d
+  read -p "$(echo -e ${GREEN}"? source dir path: "${BLACK})" source_dir;
 else
   if [ "${1}" == "--help" ]; then
     echo -e "\n  ${HELP}\n"
@@ -46,7 +49,7 @@ else
   exit 1
 fi
 if [ "${2}" == "" ]; then
-  read -p "$(echo -e ${green}"? source name: "${black})" source_name;
+  read -p "$(echo -e ${GREEN}"? source name: "${BLACK})" source_name;
 else
   source_name="${2}"
 fi
@@ -58,11 +61,11 @@ else
 fi
 
 if [ "${3}" == "" ]; then
-  MOUNT_POINT=${system_mount_point}/${USER}
+  MOUNT_POINT=${USER_MOUNT_POINT}/${USER}
   #set +x
-  find ${system_mount_point}/${USER}/* -maxdepth 2 -type d
+  find ${USER_MOUNT_POINT}/${USER}/* -maxdepth 2 -type d
   #set -x
-  read -p "$(echo -e ${green}"? target dir: "${black})" target_dir;
+  read -p "$(echo -e ${GREEN}"? target dir: "${BLACK})" target_dir;
 else
   target_dir="${3}"
 fi
