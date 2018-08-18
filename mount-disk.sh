@@ -128,7 +128,7 @@ done
     fileOk=false
 
     while [ "${fileOk}" == "false" ]; do
-      read -p "$(echo -e ${green}"? pin file: "${black})" pin_name;
+      read -p "$(echo -e ${green}"? PIN file: "${black})" pin_name;
       if [ -e "${key_dir}/${pin_name}" ]; then
         fileOk=true
         ls -1 "${key_dir}/${pin_name}"
@@ -140,7 +140,7 @@ done
         #cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"; returnCode=${?}
       else
         echo -e "\nERROR: file ${key_dir}/${pin_name} could not be found!\n"
-        #read -p "press any key to select another pin file"
+        #read -p "press any key to select another PIN file"
         #exit 1
       fi
     done
@@ -148,6 +148,7 @@ done
     cypherOk=false
 
     while [ "${cypherOk}" == "false" ]; do
+      echo -e "  [INFO] decrypting PIN file ..."
       cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"; returnCode=${?}
       if [ ${returnCode} == 0 ]; then
         cypherOk=true
@@ -202,6 +203,7 @@ while [ "${mount}" == "true" ]; do
       #sudo cryptsetup create $VG_MOUNT $LO_MOUNT
       sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
     else
+      echo -e "  [INFO] decrypting disk file ..."
       #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
       eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
     fi
