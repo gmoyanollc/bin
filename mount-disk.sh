@@ -148,7 +148,7 @@ done
     cypherOk=false
 
     while [ "${cypherOk}" == "false" ]; do
-      echo -e "  [INFO] decrypting PIN file ..."
+    echo -e "\n[INFO] decrypting PIN file...\n"
       cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"; returnCode=${?}
       if [ ${returnCode} == 0 ]; then
         cypherOk=true
@@ -194,7 +194,7 @@ while [ "${mount}" == "true" ]; do
   decryptOk=false
 
   while [ "${decryptOk}" == "false" ]; do
-    echo -e "\ndecrypting...\n"
+    echo -e "\n[INFO] decrypting disk file...\n"
     #// gMODIFY
     #// gCOMMENT asymmetric encryption
     #gpg --no-default-keyring --secret-keyring keyrings/secret.gpg --keyring keyrings/public.gpg --trustdb-name keyrings/trustdb.gpg --decrypt "disks/$disk_name.key.gpg" | sudo cryptsetup luksOpen $LO_MOUNT $VG_MOUNT -d -
@@ -203,7 +203,6 @@ while [ "${mount}" == "true" ]; do
       #sudo cryptsetup create $VG_MOUNT $LO_MOUNT
       sudo cryptsetup --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
     else
-      echo -e "  [INFO] decrypting disk file ..."
       #// gCOMMENT return code 32 is thrown when the wrong key file is applied to decryption
       eval "gpg -q -d '${key_file}'" | sudo cryptsetup ${cypher} --key-file - create $VG_MOUNT $LO_MOUNT; returnCode=${?}
     fi
