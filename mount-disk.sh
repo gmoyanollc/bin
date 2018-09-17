@@ -152,6 +152,7 @@ done
       cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"; returnCode=${?}
       if [ ${returnCode} == 0 ]; then
         cypherOk=true
+        echo -e "\n[INFO] decrypting PIN file...success\n"
       fi
     done
     
@@ -208,6 +209,7 @@ while [ "${mount}" == "true" ]; do
     fi
     if [ ${returnCode} == 0 ]; then 
       decryptOk=true
+      echo -e "\n[INFO] decrypting disk file...success\n"
       sudo cryptsetup status $VG_MOUNT; (echo "return code: ${?}")
       sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"; returnCode=${?}; (echo "return code: ${?}")
       if [ ${returnCode} == 0 ]; then
