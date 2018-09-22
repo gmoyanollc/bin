@@ -148,7 +148,7 @@ done
     cypherOk=false
 
     while [ "${cypherOk}" == "false" ]; do
-    echo -e "\n[INFO] decrypting PIN file...\n"
+    echo -e "\n[INFO] prompting for PIN file passphrase...\n"
       cypher="$(GPG_AGENT_INFO='' gpg -q -d "${pin_file}")"; returnCode=${?}
       if [ ${returnCode} == 0 ]; then
         cypherOk=true
@@ -195,7 +195,7 @@ while [ "${mount}" == "true" ]; do
   decryptOk=false
 
   while [ "${decryptOk}" == "false" ]; do
-    echo -e "\n[INFO] decrypting disk file...\n"
+    echo -e "\n[INFO] prompting for disk file passphrase...\n"
     #// gMODIFY
     #// gCOMMENT asymmetric encryption
     #gpg --no-default-keyring --secret-keyring keyrings/secret.gpg --keyring keyrings/public.gpg --trustdb-name keyrings/trustdb.gpg --decrypt "disks/$disk_name.key.gpg" | sudo cryptsetup luksOpen $LO_MOUNT $VG_MOUNT -d -
