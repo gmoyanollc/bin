@@ -1,0 +1,10 @@
+#!/bin/bash
+# [Gedit Tool]
+# Input=document
+# Save-files=nothing
+# Applicability=all
+# Output=replace-document
+
+stdin=$(cat)
+echo "$stdin" | gpg -d --no-tty - 2> /dev/null
+

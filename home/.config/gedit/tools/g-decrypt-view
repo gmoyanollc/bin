@@ -1,0 +1,10 @@
+#!/bin/bash
+# [Gedit Tool]
+# Input=document
+# Output=output-panel
+# Applicability=all
+# Save-files=nothing
+
+stdin=$(cat)
+echo "$stdin" | gpg -d --no-tty - 2> /dev/null
+
