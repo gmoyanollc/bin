@@ -104,7 +104,8 @@ while [ ${unmountOk} == "false" ]; do
     echo -e "\n  ** successful disk unmount ** \n"
   else
     echo -e "\n  ERROR: disk unmount failure\n"
-    read -p "$(echo -e ${green}"  press any key to try again... "${black})";
+    echo -e "\n  INFO: consider previously logged UMOUNT message\n"
+    read -p "$(echo -e ${green}"  press Enter to try again... "${black})";
   fi
 done
 
