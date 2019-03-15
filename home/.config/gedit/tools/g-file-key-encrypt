@@ -1,0 +1,14 @@
+#!/bin/bash
+# external tools are found in ~/.config/gedit/tools
+# [Gedit Tool]
+# Name=g-file-key-encrypt
+# Applicability=all
+# Output=replace-document
+# Input=document
+# Save-files=nothing
+
+stdin=$(cat)
+#key=$(bash ~/bin/getFile.sh)
+file=$(zenity --file-selection)
+echo "$stdin" | openssl aes-256-cbc -md sha256 -e -a -pass file:"${file}"
+
