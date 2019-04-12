@@ -6,3 +6,4 @@ Icon=
 Terminal=true
 Type=Application
 Categories=Utility;Application;
+Name[en_US]=mount-disk
