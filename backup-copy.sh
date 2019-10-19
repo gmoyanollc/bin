@@ -56,8 +56,15 @@ fi
 if [ -f "${source_dir}/${source_name}" ]; then
   ls -1 "${source_dir}/${source_name}"
 else
-  echo "Error: ${source_dir}/${source_name} could not be found!"
-  exit 1
+# +20191018 begin
+  if [ -d "${source_dir}/${source_name}" ]; then
+    echo "[INFO] directory selected"
+    isDir=true
+# +20191018 end
+  else
+    echo "Error: ${source_dir}/${source_name} could not be found!"
+    exit 1
+  fi
 fi
 
 if [ "${3}" == "" ]; then
@@ -77,7 +84,13 @@ else
 fi
 
 date=$(date +%Y%m%d%H%M%S)
-cp -v "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}" &
+# +20191018 begin
+if [ "${isDir}" == "true" ]; then
+  cp -av "${source_dir}/${source_name}/." "${target_dir}/${source_name}-${date}/" &
+else
+# +20191018 end
+  cp -v "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}" &
+fi
 pid=$! # Process Id of the previous running command
 echo -e "\ncopying...\n"
 spin='-\|/'
