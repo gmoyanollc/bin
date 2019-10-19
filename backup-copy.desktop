@@ -1,9 +1,9 @@
 [Desktop Entry]
 Name=backup-copy.sh
 Comment=backup a file by copying 
-Exec=backup-copy.sh
+Exec=bash -c "bash $HOME/bin/backup-copy.sh"
 Icon=
 Terminal=true
 Type=Application
-Categories=Utility;Application;
-Name[en_US]=backup-copy.sh
+Categories=Utility;
+Name[en_US]=backup-copy

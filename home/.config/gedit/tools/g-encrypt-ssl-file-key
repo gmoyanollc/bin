@@ -1,7 +1,8 @@
 #!/bin/bash
 # external tools are found in ~/.config/gedit/tools
+# tool file permission requires read-write and 'allow executing file as a program'
 # [Gedit Tool]
-# Name=g-file-key-decrypt
+# Name=g-encrypt-ssl-file-key
 # Applicability=all
 # Output=replace-document
 # Input=document
@@ -10,5 +11,5 @@
 stdin=$(cat)
 #key=$(bash ~/bin/getFile.sh)
 file=$(zenity --file-selection)
-echo "$stdin" | openssl aes-256-cbc -md sha256 -d -a -pass file:"${file}"
+echo "$stdin" | openssl aes-256-cbc -md sha256 -e -a -pass file:"${file}"
 
