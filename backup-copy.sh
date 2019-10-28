@@ -45,11 +45,11 @@ fi
 if [ -d "${source_dir}" ]; then
   ls -1 "${source_dir}"
 else
-  echo "[ERROR] ${source_dir} could not be found!"
+  read -p "[ERROR] ${source_dir} could not be found!"
   exit 1
 fi
 if [ "${2}" == "" ]; then
-  read -p "$(echo -e ${GREEN}"? source name or '.': "${BLACK})" source_name;
+  read -p "$(echo -e ${GREEN}"? source name: "${BLACK})" source_name;
 else
   source_name="${2}"
 fi
@@ -62,7 +62,7 @@ else
     isDir=true
 # +20191018 end
   else
-    echo "[ERROR] ${source_dir}/${source_name} could not be found!"
+    read -p "[ERROR] ${source_dir}/${source_name} could not be found!"
     exit 1
   fi
 fi
@@ -80,7 +80,7 @@ fi
 if [ -d "${target_dir}" ]; then
   eval "ls -1 '${target_dir}'"
 else
-  echo "[ERROR] ${target_dir} could not be found!"
+  read -p "[ERROR] ${target_dir} could not be found!"
   exit 1
 fi
 
@@ -88,11 +88,15 @@ date=$(date +%Y%m%d%H%M%S)
 # +20191023 begin
 echo -e "\n[INFO] copying...\n"
 if [ "${isDir}" == "true" ]; then
-  rsync -a --progress "${source_dir}/." "${target_dir}/${source_dir##*/}-${date}/" &
+  target_name="${target_dir}/${source_name}-${date}/"
+  #rsync -a --progress "${source_dir}/." "${target_dir}/${source_dir##*/}-${date}/"
+  rsync -a --progress "${source_dir}/${source_name}/." "${target_name}"
 else
 # +20191023 end
+  target_name="${target_dir}/${source_name}-${date}/"
 # 20191023 cp -v "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}" &
-  rsync -a --progress "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}/" &
+#  rsync -a --progress "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}/"
+  rsync -a --progress "${source_dir}/${source_name}" "${target_name}"
 fi
 # -20191023 begin
 #pid=$! # Process Id of the previous running command
@@ -107,5 +111,6 @@ fi
 #  sleep .1
 #done
 # -20191023 end
-echo -e "\n[INFO] done.\n"
+echo -e "\n[INFO] done: ${target_name}\n"
+read -p ':'
 
