@@ -45,7 +45,7 @@ fi
 if [ -d "${source_dir}" ]; then
   ls -1 "${source_dir}"
 else
-  echo "Error: ${source_dir} could not be found!"
+  read -p "[ERROR] ${source_dir} could not be found!"
   exit 1
 fi
 if [ "${2}" == "" ]; then
@@ -62,7 +62,7 @@ else
     isDir=true
 # +20191018 end
   else
-    echo "Error: ${source_dir}/${source_name} could not be found!"
+    read -p "[ERROR] ${source_dir}/${source_name} could not be found!"
     exit 1
   fi
 fi
@@ -70,6 +70,7 @@ fi
 if [ "${3}" == "" ]; then
   MOUNT_POINT=${USER_MOUNT_POINT}/${USER}
   #set +x
+  find ${HOME} -maxdepth 1 -type d
   find ${USER_MOUNT_POINT}/${USER}/* -maxdepth 2 -type d
   #set -x
   read -p "$(echo -e ${GREEN}"? target dir: "${BLACK})" target_dir;
@@ -79,28 +80,37 @@ fi
 if [ -d "${target_dir}" ]; then
   eval "ls -1 '${target_dir}'"
 else
-  echo "Error: ${target_dir} could not be found!"
+  read -p "[ERROR] ${target_dir} could not be found!"
   exit 1
 fi
 
 date=$(date +%Y%m%d%H%M%S)
-# +20191018 begin
+# +20191023 begin
+echo -e "\n[INFO] copying...\n"
 if [ "${isDir}" == "true" ]; then
-  cp -av "${source_dir}/${source_name}/." "${target_dir}/${source_name}-${date}/" &
+  target_name="${target_dir}/${source_name}-${date}/"
+  #rsync -a --progress "${source_dir}/." "${target_dir}/${source_dir##*/}-${date}/"
+  rsync -a --progress "${source_dir}/${source_name}/." "${target_name}"
 else
-# +20191018 end
-  cp -v "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}" &
+# +20191023 end
+  target_name="${target_dir}/${source_name}-${date}/"
+# 20191023 cp -v "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}" &
+#  rsync -a --progress "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}/"
+  rsync -a --progress "${source_dir}/${source_name}" "${target_name}"
 fi
-pid=$! # Process Id of the previous running command
-echo -e "\ncopying...\n"
-spin='-\|/'
-i=0
+# -20191023 begin
+#pid=$! # Process Id of the previous running command
+#echo -e "\ncopying...\n"
+#spin='-\|/'
+#i=0
 
-while kill -0 $pid 2>/dev/null
-do
-  i=$(( (i+1) %4 ))
-  printf "\r${spin:$i:1}"
-  sleep .1
-done
-echo -e "\ndone.\n"
+#while kill -0 $pid 2>/dev/null
+#do
+#  i=$(( (i+1) %4 ))
+#  printf "\r${spin:$i:1}"
+#  sleep .1
+#done
+# -20191023 end
+echo -e "\n[INFO] done: ${target_name}\n"
+read -p ':'
 
