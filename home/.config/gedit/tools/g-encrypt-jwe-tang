@@ -1,0 +1,15 @@
+#!/bin/bash
+# external tools are found in ~/.config/gedit/tools
+# tool file permission requires read-write and 'allow executing file as a program'
+# [Gedit Tool]
+# Name=g-encrypt-jwe-tang
+# Applicability=all
+# Output=replace-document
+# Input=document
+# Save-files=nothing
+
+stdin=$(cat)
+# pw=$(zenity --entry --text="passphrase" --entry-text="passphrase")
+# echo "$stdin" | openssl enc -aes-256-cbc -salt -a -pass pass:"${pw}"
+tangServer=$(zenity --entry --text="tangServerIp:port" --entry-text="tangServerIp:port")
+echo ${stdin} | clevis encrypt tang '{"url":"http://'${tangServer}'","thp":"r3FmCljv3Bn5Jz5xOpkAJpJDR1Q"}'
