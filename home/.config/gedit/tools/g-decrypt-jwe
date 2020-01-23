@@ -1,0 +1,15 @@
+#!/bin/bash
+# external tools are found in ~/.config/gedit/tools
+# tool file permission requires read-write and 'allow executing file as a program'
+# [Gedit Tool]
+# Name=g-decrypt-jwe
+# Applicability=all
+# Output=replace-document
+# Input=document
+# Save-files=nothing
+
+stdin=$(cat)
+# pw=$(zenity --entry --text="passphrase" --entry-text="passphrase")
+# echo "$stdin" | openssl enc -aes-256-cbc -d -a -pass pass:"${pw}"
+echo ${stdin} | clevis decrypt 
+
