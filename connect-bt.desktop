@@ -2,7 +2,9 @@
 Name=connect-mouse
 Comment=connect bluetooth mouse
 Icon=
-Exec=bash -c "bash $HOME/bin/connect-mouse.sh"
+Exec=bash -c "bash $HOME/bin/connect-bt.sh"
 Type=Application
 Terminal=true
 Categories=System;
+Name[en_US]=connect-bt
+Comment[en_US.UTF-8]=connect bluetooth devices
