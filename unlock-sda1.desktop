@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=unlock-sda1
+Comment=unlock luks usb drive
+Icon=
+Exec=bash -c "sudo clevis luks unlock -d /dev/sda1"
+Type=Application
+Terminal=true
+Categories=System;
+Name[en_US]=unlock-sda1
+Comment[en_US.UTF-8]=unlock luks usb drive
