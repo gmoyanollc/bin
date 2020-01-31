@@ -12,4 +12,4 @@ stdin=$(cat)
 # pw=$(zenity --entry --text="passphrase" --entry-text="passphrase")
 # echo "$stdin" | openssl enc -aes-256-cbc -salt -a -pass pass:"${pw}"
 tangServer=$(zenity --entry --text="tangServerIp:port" --entry-text="tangServerIp:port")
-echo ${stdin} | clevis encrypt tang '{"url":"http://'${tangServer}'","thp":"r3FmCljv3Bn5Jz5xOpkAJpJDR1Q"}'
+echo "${stdin}" | clevis encrypt tang '{"url":"http://'${tangServer}'","thp":"r3FmCljv3Bn5Jz5xOpkAJpJDR1Q"}'
