@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=gnome-disk-image-mounter-rw
+Comment=
+Icon=
+Exec=gnome-disk-image-mounter --writable
+Type=Application
+Terminal=false
+Categories=System;
+Name[en_US]=gnome-disk-image-mounter-rw
+Comment[en_US.UTF-8]=
