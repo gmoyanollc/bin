@@ -93,9 +93,10 @@ while [ "${dirOk}" == "false" ]; do
   #if [ ! "${tryAgainKeyDir}" == "true" ]; then
   find "${USER_MOUNT_POINT}/${USER}/"* -maxdepth 2 -type d
   #fi
-  read -p "$(echo -e ${green}"? key dir ('n/a' == no key): "${black})" key_dir;
-  if [ "${key_dir}" == "n/a" ]; then 
+  read -p "$(echo -e ${green}"? key dir (if key is not used, 'none'): "${black})" key_dir;
+  if [ "${key_dir}" == "none" ]; then 
     no_key=0
+    dirOk=true
   else
     if [ -d "${key_dir}" ]; then
       dirOk=true
