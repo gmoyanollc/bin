@@ -1,9 +1,9 @@
 # !/usr/bin/bash
 # unlock-partition.sh
 lsblk
-device=$(zenity --entry= --entry-text="/dev/sdb1" --text="/dev/sdb1")
-echo "[INFO] unlocking partition ${device}..."
+device=$(zenity --entry= --entry-text="" --text="[sd[a-z][n]] [loop[n]]")
+echo "[INFO] unlocking partition /dev/${device}..."
 sudo clevis luks unlock -d ${device}
-echo "[INFO] done."
+echo "[INFO] done, return code: ${?}"
 read
 
