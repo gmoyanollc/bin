@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+set -x
 # Copyright (2016), [George Moyano](https://onename.com/gmoyano)
 #
 # All rights reserved.
@@ -23,8 +24,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-HELP="usage: ${0} source_dir source_name target_dir"
-#system_mount_point="/run/media"
+HELP="usage: ${0} source target_dir"
 USER_MOUNT_POINT="/run/media"
 #SYSTEM_MOUNT_POINT="/media"
 GREEN="\033[32m"
@@ -34,40 +34,35 @@ if [ "${1}" == "" ]; then
   find ${HOME} -maxdepth 1 -type d 
   find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d
   read -p "$(echo -e ${GREEN}"? source dir path: "${BLACK})" source_dir;
+  if [ -d "${source_dir}" ]; then
+    ls -1 "${source_dir}"
+    read -p "$(echo -e ${GREEN}"? source name: "${BLACK})" source_name;
+    source="${source_dir}/${source_name}"
+    if [ -f "${source}" ]; then
+      ls -1 "${source}"
+    else
+      if [ -d "${source}" ]; then
+        echo "[INFO] directory selected"
+        isDir=true
+      else
+        read -p "[ERROR] ${source} could not be found!"
+        exit 1
+      fi
+    fi  
+  else
+    read -p "[ERROR] ${source_dir} could not be found!"
+    exit 1
+  fi
 else
   if [ "${1}" == "--help" ]; then
     echo -e "\n  ${HELP}\n"
     exit 0
   else
-    source_dir="${1}"
+    source="${1}"
   fi
 fi
-if [ -d "${source_dir}" ]; then
-  ls -1 "${source_dir}"
-else
-  read -p "[ERROR] ${source_dir} could not be found!"
-  exit 1
-fi
+echo "source: ${source}"
 if [ "${2}" == "" ]; then
-  read -p "$(echo -e ${GREEN}"? source name: "${BLACK})" source_name;
-else
-  source_name="${2}"
-fi
-if [ -f "${source_dir}/${source_name}" ]; then
-  ls -1 "${source_dir}/${source_name}"
-else
-# +20191018 begin
-  if [ -d "${source_dir}/${source_name}" ]; then
-    echo "[INFO] directory selected"
-    isDir=true
-# +20191018 end
-  else
-    read -p "[ERROR] ${source_dir}/${source_name} could not be found!"
-    exit 1
-  fi
-fi
-
-if [ "${3}" == "" ]; then
   MOUNT_POINT=${USER_MOUNT_POINT}/${USER}
   #set +x
   find ${HOME} -maxdepth 1 -type d
@@ -75,7 +70,7 @@ if [ "${3}" == "" ]; then
   #set -x
   read -p "$(echo -e ${GREEN}"? target dir: "${BLACK})" target_dir;
 else
-  target_dir="${3}"
+  target_dir="${2}"
 fi
 if [ -d "${target_dir}" ]; then
   eval "ls -1 '${target_dir}'"
@@ -85,32 +80,17 @@ else
 fi
 
 date=$(date +%Y%m%d%H%M%S)
-# +20191023 begin
 echo -e "\n[INFO] copying...\n"
 if [ "${isDir}" == "true" ]; then
-  target_name="${target_dir}/${source_name}-${date}/"
-  #rsync -a --progress "${source_dir}/." "${target_dir}/${source_dir##*/}-${date}/"
-  rsync -a --progress "${source_dir}/${source_name}/." "${target_name}"
+  target_name="${target_dir}/$(basename ${source})-${date}/"
+  #rsync -a --progress "${source}/." "${target_dir}/${source_dir##*/}-${date}/"
+  rsync -a --progress "${source}/." "${target_name}"
 else
-# +20191023 end
-  target_name="${target_dir}/${source_name}-${date}/"
-# 20191023 cp -v "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}" &
-#  rsync -a --progress "${source_dir}/${source_name}" "${target_dir}/${source_name}-${date}/"
-  rsync -a --progress "${source_dir}/${source_name}" "${target_name}"
+  target_name="${target_dir}/$(basename ${source})-${date}/"
+# 20191023 cp -v "${source}" "${target_dir}/$(basename ${source})-${date}" &
+#  rsync -a --progress "${source}" "${target_dir}/$(basename ${source})-${date}/"
+  rsync -a --progress "${source}" "${target_name}"
 fi
-# -20191023 begin
-#pid=$! # Process Id of the previous running command
-#echo -e "\ncopying...\n"
-#spin='-\|/'
-#i=0
-
-#while kill -0 $pid 2>/dev/null
-#do
-#  i=$(( (i+1) %4 ))
-#  printf "\r${spin:$i:1}"
-#  sleep .1
-#done
-# -20191023 end
 echo -e "\n[INFO] done: ${target_name}\n"
 read -p ':'
 
