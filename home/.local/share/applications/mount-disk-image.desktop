@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=unlock-partition
+Comment=unlock clevis luks partition
+Icon=
+Exec=bash "bin/mount-disk-image.sh"
+Type=Application
+Terminal=true
+Categories=System;
+Name[en_US]=mount-disk-image
+Comment[en_US.UTF-8]=mount image and unlock clevis luks partition
