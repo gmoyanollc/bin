@@ -6,7 +6,8 @@ SOURCE_FOLDER=${1}/
 ORIGIN_FOLDER=$(pwd)
 echo SOURCE_FOLDER: ${SOURCE_FOLDER}
 echo ORIGIN_FOLDER: ${ORIGIN_FOLDER}
-read "[INFO] press any key to continue"
+echo "[INFO] press any key to continue"
+read
 cd ${SOURCE_FOLDER}
 # for i in *.wav; do ffmpeg -i "$i" "${i%.*}.mp3"; done
 for i in *.wav; do ffmpeg -i "${i}" -acodec mp3 -ab 128k "${i%.*}.mp3"; done
