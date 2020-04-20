@@ -5,4 +5,4 @@ echo -x
 sourceFolder=${1}/
 # for i in *.wav; do ffmpeg -i "$i" "${i%.*}.mp3"; done
 
-for i in ${sourceFolder}*.wav; do ffmpeg -i "${sourceFolder}${i}" -acodec mp3 -ab 128k "${sourceFolder}${i%.*}.mp3"; done
+for i in ${sourceFolder}*.wav; do ffmpeg -i "${i}" -acodec mp3 -ab 128k "${sourceFolder}${i%.*}.mp3"; done
