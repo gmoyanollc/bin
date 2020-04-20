@@ -6,6 +6,7 @@ SOURCE_FOLDER=${1}/
 ORIGIN_FOLDER=$(pwd)
 echo SOURCE_FOLDER: ${SOURCE_FOLDER}
 echo ORIGIN_FOLDER: ${ORIGIN_FOLDER}
+ls ${SOURCE_FOLDER}
 echo "[INFO] press any key to continue"
 read
 cd ${SOURCE_FOLDER}
