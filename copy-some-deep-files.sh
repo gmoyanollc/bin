@@ -11,6 +11,9 @@ find ${SOURCE_FOLDER} -ctime ${FILE_DAYS_FILTER} -name "${FILE_NAME_FILTER}" -ty
 echo TARGET_FOLDER: ${TARGET_FOLDER}
 echo "[INFO] press any key to continue"
 read
-find ${SOURCE_FOLDER} -ctime ${FILE_DAYS_FILTER} -name "${FILE_NAME_FILTER}" -type f | cpio -dpmv ${TARGET_FOLDER}
+ORIGIN_FOLDER=$(pwd)
+cd ${SOURCE_FOLDER}
+find . -ctime ${FILE_DAYS_FILTER} -name "${FILE_NAME_FILTER}" -type f | cpio -dpmv ${TARGET_FOLDER}
+cd ${ORIGIN_FOLDER}
 echo [INFO] done.
 
