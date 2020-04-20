@@ -12,6 +12,8 @@ read
 cd ${SOURCE_FOLDER}
 # for i in *.wav; do ffmpeg -i "$i" "${i%.*}.mp3"; done
 for i in *.wav; do ffmpeg -i "${i}" -acodec mp3 -ab 128k "${i%.*}.mp3"; done
+echo SOURCE_FOLDER: ${SOURCE_FOLDER}
+ls ${SOURCE_FOLDER}
 cd ${ORIGIN_FOLDER}
 echo [INFO] done.
 
