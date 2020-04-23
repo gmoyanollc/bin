@@ -2,8 +2,8 @@
 echo "[INFO] ready to rip to current directory..."
 echo "[INFO] $(pwd)" 
 sudo cdparanoia -B
-echo "[INFO] done...ready to eject..."
+echo -ne "[INFO] done...ready to eject...\007"
 sudo eject
-echo "[INFO] convert wav to mp3..."
+echo -ne "[INFO] convert wav to mp3...\007"
 bash ~/bin/wav2mp3-ffmpeg.sh .
-echo "[INFO] done."
+echo -ne "[INFO] done.\007"
