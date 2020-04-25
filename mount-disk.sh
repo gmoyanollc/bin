@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+#set -x
 # Copyright (c) 2013, Patrick Uiterwijk <patrick@uiterwijk.org>
 # All rights reserved.
 # 
@@ -54,32 +55,37 @@ while [ "${dirOk}" == "false" ]; do
     find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d 
     read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
   else
-    disk_dir="${1}"
-  fi
-  #fi
-  #read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
-  if [ -d "${disk_dir}" ]; then
-    dirOk=true
-    ls -1 "${disk_dir}"
-  else
-    echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
-    read -p "  Press any key to try again.";
-    #tryAgainDiskDir=true
-    set -- "${@:1}" ""
+    if [ -d "${1}" ]; then
+      echo "[INFO] directory selected"
+      dirOk=true
+      fileOk=false
+      ls -1 "${disk_dir}"
+      disk_dir="${1}"
+    else
+      if [ -f "${1}" ]; then
+        echo "[INFO] disk file selected"
+        dirOk=true
+        fileOk=true
+        disk_file="${1}"
+        disk_name="$(basename ${disk_file})"
+        ls -1 "${disk_file}"
+      else
+        echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
+        read -p "  Press any key to try again.";
+        set -- "${@:1}" ""
+      fi
+    fi
   fi
 done
-
-fileOk=false
 
 while [ "${fileOk}" == "false" ]; do
   read -p "$(echo -e ${green}"? disk file: "${black})" disk_name;
   if [ -e "${disk_dir}/${disk_name}" ]; then
     fileOk=true
-    ls -1 "${disk_dir}/${disk_name}"
+    disk_file="${disk_dir}/${disk_name}"
+    ls -1 "${disk_file}"
   else
     echo -e "\nERROR: file ${disk_dir}/${disk_name} could not be found!\n"
-    #echo "${disk_dir}/${disk_name}"
-    #ls -1 "${disk_dir}/${disk_name}"
   fi
 done
   
@@ -163,7 +169,7 @@ done
 mount=true
 
 while [ "${mount}" == "true" ]; do
-  if [ -e "${disk_dir}/${disk_name}.mounted" ] || [ -d "${MOUNT_POINT}" ]; then
+  if [ -e "${disk_file}.mounted" ] || [ -d "${MOUNT_POINT}" ]; then
     if [ "$3" == "auto" ]; then
       exit 0
     else
@@ -191,7 +197,7 @@ while [ "${mount}" == "true" ]; do
   #// gCOMMENT left single quotes aren't working as expected in bash, in sh, they execute
   LO_MOUNT=`losetup -f`
   VG_MOUNT=`date +%s | sha1sum | head -c 8`
-  sudo losetup $LO_MOUNT "${disk_dir}/${disk_name}"
+  sudo losetup $LO_MOUNT "${disk_file}"
   returnCode=0
   decryptOk=false
 
@@ -215,7 +221,7 @@ while [ "${mount}" == "true" ]; do
       sudo mount /dev/mapper/$VG_MOUNT "$MOUNT_POINT"; returnCode=${?}; (echo "return code: ${?}")
       if [ ${returnCode} == 0 ]; then
         echo -e "\n  ** successful disk mount ** \n"
-        echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" > "${disk_dir}/${disk_name}.mounted"
+        echo "$LO_MOUNT:$VG_MOUNT:$MOUNT_POINT" > "${disk_file}.mounted"
         sudo chown -R "$USER:$USER" "$MOUNT_POINT"
         sudo -k
       else
