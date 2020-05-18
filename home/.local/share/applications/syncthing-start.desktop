@@ -2,7 +2,7 @@
 Name=Start Syncthing
 GenericName=File synchronization
 Comment=Starts the main syncthing process in the background.
-Exec=./syncthing/syncthing-linux-amd64-v1.3.4/syncthing -no-browser
+Exec=/usr/bin/syncthing -no-browser -logfile=default
 Icon=syncthing
 Terminal=false
 Type=Application
