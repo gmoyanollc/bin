@@ -80,16 +80,14 @@ else
 fi
 
 date=$(date +%Y%m%d%H%M%S)
+target_name="${target_dir}/$(basename ${source})-${date}/"
 echo -e "\n[INFO] copying...\n"
 if [ "${isDir}" == "true" ]; then
-  target_name="${target_dir}/$(basename ${source})-${date}/"
-  #rsync -a --progress "${source}/." "${target_dir}/${source_dir##*/}-${date}/"
-  rsync -a --progress "${source}/." "${target_name}"
+#  rsync -a --progress "${source}/." "${target_name}"
+  cp -v "${source}/." "${target_name}"
 else
-  target_name="${target_dir}/$(basename ${source})-${date}/"
-# 20191023 cp -v "${source}" "${target_dir}/$(basename ${source})-${date}" &
-#  rsync -a --progress "${source}" "${target_dir}/$(basename ${source})-${date}/"
-  rsync -a --progress "${source}" "${target_name}"
+#  rsync -a --progress "${source}" "${target_name}"
+  cp -v "${source}" "${target_name}"
 fi
 echo -e "\n[INFO] done: ${target_name}\n"
 read -p ':'
