@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=unlock-partition
+Comment=unlock clevis luks partition
+Icon=
+Exec=bash "bin/unlock-partition.sh"
+Type=Application
+Terminal=true
+Categories=System;
+Name[en_US]=unlock-partition
+Comment[en_US.UTF-8]=unlock clevis luks partition
