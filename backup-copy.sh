@@ -80,7 +80,7 @@ else
 fi
 
 date=$(date +%Y%m%d%H%M%S)
-target_name="${target_dir}/$(basename ${source})-${date}/"
+target_name="${target_dir}/$(basename ${source})-${date}"
 echo -e "\n[INFO] copying...\n"
 if [ "${isDir}" == "true" ]; then
 #  rsync -a --progress "${source}/." "${target_name}"
