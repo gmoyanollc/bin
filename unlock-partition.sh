@@ -35,6 +35,7 @@ if [[ ${clevisUnlockReturnCode} -eq 5 ]] && [[ $(echo ${clevisUnlockResult} | gr
 fi
 if [ ${clevisUnlockReturnCode} -eq 0 ]; then
   lsblk --output NAME,TRAN,TYPE,FSTYPE,MOUNTPOINT,STATE | grep -A 1 ${device}
+fi
 echo "[INFO] done."
 
 
