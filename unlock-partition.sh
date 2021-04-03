@@ -17,7 +17,7 @@
 # 
 
 #set -x
-lsblk --output NAME,TRAN,TYPE,FSTYPE,MOUNTPOINT,STATE | grep "NAME\|crypt\|usb  disk"
+lsblk --output NAME,TRAN,TYPE,FSTYPE,MOUNTPOINT,STATE | grep "NAME\|crypt\|disk\|loop"
 device=$(zenity --entry= --entry-text="" --text="[sd[a-z][n]] [loop[n]]")
 echo "[INFO] unlocking partition at block device /dev/${device}..."
 clevisUnlockResult=$((sudo clevis luks unlock -d /dev/${device}) 2>&1) 
