@@ -17,7 +17,7 @@
 # 
 
 #set -x
-lsblk --output NAME,TRAN,TYPE,MOUNTPOINT,STATE
+lsblk --output NAME,TRAN,TYPE,FSTYPE,MOUNTPOINT,STATE | grep "NAME\|crypt\|usb  disk"
 device=$(zenity --entry= --entry-text="" --text="[sd[a-z][n]] [loop[n]]")
 echo "[INFO] unlocking partition at block device /dev/${device}..."
 clevisUnlockResult=$((sudo clevis luks unlock -d /dev/${device}) 2>&1) 
@@ -33,6 +33,8 @@ if [[ ${clevisUnlockReturnCode} -eq 5 ]] && [[ $(echo ${clevisUnlockResult} | gr
   echo "[INFO] closing luks volume ${luksName} to try again..."
   sudo cryptsetup close ${luksName}
 fi
+if [ ${clevisUnlockReturnCode} -eq 0 ]; then
+  lsblk --output NAME,TRAN,TYPE,FSTYPE,MOUNTPOINT,STATE | grep -A 1 ${device}
 echo "[INFO] done."
-read
+
 
