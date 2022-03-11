@@ -9,7 +9,7 @@ For Linux, the installation may take the following general steps if the system i
   
 ## Download U.S. Federal Government certificates
 
-  1. Download DoD PKI CA Certificates](http://iasecontent.disa.mil/pki-pke/Certificates_PKCS7_v5.3_DoD.zip)
+  1. Download [DoD PKI CA Certificates](https://dl.cyber.mil/pki-pke/zip/certificates_pkcs7_DoD.zip) from [Public Key Infrastructure/Enabling (PKI/PKE) For Administrators, Integrators and Developers](https://cyber.mil/pki-pke/admins/).
 
 ## Install `Enterprise Security Client Smart Card Client`
   
@@ -38,7 +38,7 @@ For Linux, the installation may take the following general steps if the system i
 ```
   2. Add a PKCS#11 Device
   ```
-    Firefox/Preferences/Advanced/Certificates/Security Devices/Load
+    Firefox/Preferences/Privacy & Security/Security/Certificates/Security Devices/Load
   ```
   3. Add a PKCS#11 Device module provider
   ```
@@ -47,7 +47,7 @@ For Linux, the installation may take the following general steps if the system i
   ```
   4. View and Import Authority Certificates
   ```
-    Firefox/Preferences/Advanced/Certificates/View Certificates/Authorities/Import
+    Firefox/Preferences/Privacy & Security/Security/Certificates/View Certificates/Authorities/Import
   ```
   5. Select and trust US Government Authority Certificate Root files
   ```
@@ -58,10 +58,10 @@ For Linux, the installation may take the following general steps if the system i
   ```
   6. View U.S. Government Authority Certificates
   ```
-    Firefox/Preferences/Advanced/Certificates/View Certificates/Authorities/Certificate Name/U.S. Government
+    Firefox/Preferences/Privacy & Security/Security/Certificates/View Certificates/Authorities/Certificate Name/U.S. Government
   ```
 ## Test
-  1. Browse to [AMRDEC SAFE](https://safe.amrdec.army.mil/safe/Welcome.aspx)
+  1. Browse to [](https://mattermost.cyberforce.site)
   2. Select `CAC Users`.
   3. Expect a CAC PIN prompt for success.
    
