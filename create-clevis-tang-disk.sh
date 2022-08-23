@@ -28,7 +28,7 @@ LUKS_NAME=${FILE_NAME}
 echo LUKS_NAME: ${LUKS_NAME}
 sudo cryptsetup open ${DEVICE_LOOP} ${LUKS_NAME}
 # sudo cryptsetup open ${DEVICE_LOOP} ${LUKS_NAME}
-sudo mkfs.ext4 /dev/mapper/${LUKS_NAME} -L ${FILE_NAME}
+sudo mkfs.ext4 /dev/mapper/${LUKS_NAME} -L ${IMAGE_FILE}
 # sudo mkfs.ext4 /dev/mapper/${LUKS_NAME} -L test
 
 sudo clevis luks bind -d ${DEVICE_LOOP} tang '{"url":"'${TANG_URL}'"}'
