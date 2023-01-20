@@ -41,7 +41,20 @@ fi
 if [ "${DEFAULT}" = "true" ]; then
   echo "default applied where not specified"
 fi
-echo "DEVICE ${DEVICE}"
-echo "NETWORK ${NETWORK}"
-set -x
-(sudo ip route del default via 192.168.${NETWORK}.1 dev ${DEVICE})
+ip route
+
+while true; do
+  read -p "delete route for network ${NETWORK}, device ${DEVICE}? (y|n) " yn
+  case $yn in
+    [Yy]* ) IS_DELETE=true; break;;
+    [Nn]* ) exit;;
+    * ) echo "Please answer yes or no.";;
+  esac
+done
+
+if [ "${IS_DELETE}" = "true" ]; then
+  set -x
+  (sudo ip route del default via 192.168.${NETWORK}.1 dev ${DEVICE})
+  ip route
+fi
+
