@@ -12,7 +12,7 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;;
-    -h|--h)
+    -h|--help)
       echo "usage: -d|--device [device] -n|--network [network]"
       exit 0 
       ;;
