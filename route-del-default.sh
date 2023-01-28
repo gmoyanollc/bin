@@ -1,3 +1,4 @@
+#!/usr/bin/bash
 POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do

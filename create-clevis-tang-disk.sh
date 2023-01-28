@@ -15,17 +15,22 @@ TANG_URL=http://${TANG_URL_IP_PORT}
 echo TANG_URL: ${TANG_URL}
 echo "Enter to start or ctrl-c to quit"
 read
+set -x
 fallocate -l ${IMAGE_SIZE} ${IMAGE_FILE}
 # fallocate -l 1G test.img
 cryptsetup -y luksFormat ${IMAGE_FILE}
 # sudo cryptsetup -y luksFormat test.img
+set +x
 DEVICE_LOOP=`losetup -f`
 echo DEVICE_LOOP: ${DEVICE_LOOP}
+set -x
 sudo losetup ${DEVICE_LOOP} ${IMAGE_FILE} 
+set +x
 # sudo losetup ${DEVICE_LOOP} test.img
 #LUKS_NAME=`date +%s | sha1sum | head -c 8`
 LUKS_NAME=${FILE_NAME}
 echo LUKS_NAME: ${LUKS_NAME}
+set -x
 sudo cryptsetup open ${DEVICE_LOOP} ${LUKS_NAME}
 # sudo cryptsetup open ${DEVICE_LOOP} ${LUKS_NAME}
 sudo mkfs.ext4 /dev/mapper/${LUKS_NAME} -L ${IMAGE_FILE}
