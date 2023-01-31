@@ -1,0 +1,21 @@
+#!/bin/bash
+# external tools are found in ~/.config/gedit/tools
+# tool file permission requires read-write and 'allow executing file as a program'
+# [Gedit Tool]
+# Name=g-pw-gen
+# Applicability=all
+# Input=document
+# Output=output-panel
+# Save-files=nothing
+
+#stdin=$(cat)
+#echo ${stdin} | qrencode -o ${GEDIT_CURRENT_DOCUMENT_DIR}/${GEDIT_CURRENT_DOCUMENT_NAME}.png
+#echo "output file: ${GEDIT_CURRENT_DOCUMENT_DIR}/${GEDIT_CURRENT_DOCUMENT_NAME}.png" 
+if [ -d /run/media/g/g-vault-202003 ]; then
+  cd /run/media/g/g-vault-202003/gen-pw;
+  sh ./gen-pw.sh
+elif 
+  echo "directory '/run/media/g/g-vault-202003' not found."
+  exit -1
+fi
+
