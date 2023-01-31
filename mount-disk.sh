@@ -233,7 +233,7 @@ while [ "${mount}" == "true" ]; do
 #      select unmount in "unmount" "quit"; do
       select unmount in "unmount"; do
         case ${unmount} in
-          unmount ) sh unmount-disk.sh "${disk_dir}" "${disk_name}"; break;;
+          unmount ) sh unmount-disk.sh -dd "${disk_dir}" -dn "${disk_name}"; break;;
 #          quit ) exit;;
         esac
       done

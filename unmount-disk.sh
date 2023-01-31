@@ -1,4 +1,51 @@
 #!/usr/bin/bash
+
+if [[ ${#} = 0 ]]; then
+  set -- --help # set arg[1]
+fi
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -dn|--disk-name)
+      DISK_NAME="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -dd|--disk-dir)
+      DISK_DIR="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -h|--help)
+      echo "usage: -dn|--disk-name [disk-name] -dd|--disk-dir [disk-dir]"
+      exit 0 
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=('$1') # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+if [ -z "${DISK_NAME}" ]; then
+  DISK_NAME=disk-name
+  DEFAULT=true
+fi
+if [ -z "${DISK_DIR}" ]; then
+  DISK_DIR=disk-dir
+  DEFAULT=true
+fi
+if [ "${DEFAULT}" = "true" ]; then
+  echo -e "\ndefault applied where not specified"
+fi
+
 # Copyright (c) 2013, Patrick Uiterwijk <patrick@uiterwijk.org>
 # All rights reserved.
 # 
@@ -25,44 +72,32 @@
 #// gINSERT source: https://patrick.uiterwijk.org/blog/2013/2/25/gpg-encrypted-loopback-disks
 
 # Configuration
-#// gINSERT {
-#set -x
-#DISK_DIR="g-disk"
 USER_MOUNT_POINT="/run/media"
 SYSTEM_MOUNT_POINT="/media"
-dirOk=false
+IS_FILE=false
 
-while [ ${dirOk} == "false" ]; do
-  if [ "${1}" == "" ]; then
-    find "${HOME}" -maxdepth 1 -type d 
+while [ ${IS_FILE} == "false" ]; do
+  if [ -f "${DISK_DIR}/${DISK_NAME}" ]; then
+    IS_FILE=true
+    (set -x; ls -1 "${DISK_DIR}/${DISK_NAME}")
+  else
+    echo -e "\nERROR: file ${DISK_DIR}/${DISK_NAME} could not be found!\n"
+    find "${HOME}" -maxdepth 1 -type d
     find "${USER_MOUNT_POINT}/${USER}" "${SYSTEM_MOUNT_POINT}" -maxdepth 2 -type d
-    read -p "$(echo -e ${green}"? disk dir path: "${black})" disk_dir;
-  else
-    disk_dir="${1}"
-  fi
-  if [ -d "${disk_dir}" ]; then
-    dirOk=true
-    ls -1 "${disk_dir}"
-  else
-    echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
-    set -- "" "${@:2}"
-  fi
-done
+    read -p "$(echo -e ${green}"? disk dir path: "${black})" DISK_DIR;
 
-fileOk=false
+    while [ ${IS_FILE} == "false" ]; do
+      if [ -f "${DISK_DIR}/${DISK_NAME}" ]; then
+        IS_FILE=true
+        (set -x; ls -1 "${DISK_DIR}/${DISK_NAME}")
+      elif [ -d "${DISK_DIR}" ]; then
+        (set -x; ls -1 "${DISK_DIR}")
+      else
+        echo -e "\nERROR: directory ${disk_dir} could not be found!\n"
+      fi
+      read -p "$(echo -e ${green}"? disk name: "${black})" DISK_NAME;
+    done
 
-while [ ${fileOk} == "false" ]; do
-  if [ "${2}" == "" ]; then
-    read -p "$(echo -e ${green}"? disk file: "${black})" disk_name;
-  else
-    disk_name="${2}"
-  fi
-  if [ -f "${disk_dir}/${disk_name}" ]; then
-    fileOk=true
-    ls -1 "${disk_dir}/${disk_name}"
-  else
-    echo -e "\nERROR: file ${disk_dir}/${disk_name} could not be found!\n"
-    set -- "${@:1}" ""
   fi
 done
 
@@ -80,26 +115,23 @@ done
 #// gCOMMENT
 #set -x
 # Get disk info
-#// gMODIFY
-#if [ ! -f "disks/$DISK_NAME.mounted" ];
-if [ ! -f "${disk_dir}/$disk_name.mounted" ];
+echo "${DISK_DIR}/$DISK_NAME.mounted" ;
+if [ ! -f "${DISK_DIR}/$DISK_NAME.mounted" ];
 then
-    echo "Disk ${disk_name} was not mounted!"
+    echo "Disk ${DISK_NAME} was not mounted!"
     exit -1
 fi
-#// gINSERT
-set -x
 #// gMODIFY
 #MOUNT_INFO="`cat "disks/$DISK_NAME.mounted"`"
-MOUNT_INFO="`cat "${disk_dir}/${disk_name}.mounted"`"
+MOUNT_INFO="`cat "${DISK_DIR}/${DISK_NAME}.mounted"`"
 LO_MOUNT="`echo ${MOUNT_INFO} | awk -F":" '{print $1}'`"
 VG_MOUNT="`echo ${MOUNT_INFO} | awk -F":" '{print $2}'`"
 MOUNT_POINT="`echo ${MOUNT_INFO} | awk -F":" '{print $3}'`"
 unmountOk=false
 
 while [ ${unmountOk} == "false" ]; do
-  sudo umount "${MOUNT_POINT}" ; returnCode=${?}
-  if [ ${returnCode} == 0 ]; then
+  (set -x; sudo umount "${MOUNT_POINT}" ; returnCode=${?})
+  if [ "${returnCode}" == "0" ]; then
     unmountOk=true
     echo -e "\n  ** successful disk unmount ** \n"
   else
@@ -111,10 +143,10 @@ done
 
 # gMODIFY
 #sudo cryptsetup luksClose /dev/mapper/$VG_MOUNT
-sudo cryptsetup close /dev/mapper/${VG_MOUNT}
-sudo losetup --detach ${LO_MOUNT}
+(set -x; sudo cryptsetup close /dev/mapper/${VG_MOUNT})
+(set -x; sudo losetup --detach ${LO_MOUNT})
 #// gMODIFY
 #rm -f "disks/$DISK_NAME.mounted"
-rm -f "${disk_dir}/${disk_name}.mounted"
-sudo rmdir "${MOUNT_POINT}"
-sudo -k
+(set -x; rm -f "${DISK_DIR}/${DISK_NAME}.mounted")
+(set -x; sudo rmdir "${MOUNT_POINT}")
+(set -x; sudo -k)
