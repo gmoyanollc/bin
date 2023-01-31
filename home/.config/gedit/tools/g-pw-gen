@@ -14,8 +14,8 @@
 if [ -d /run/media/g/g-vault-202003 ]; then
   cd /run/media/g/g-vault-202003/gen-pw;
   sh ./gen-pw.sh
-elif 
-  echo "directory '/run/media/g/g-vault-202003' not found."
+else 
+  echo "default directory '/run/media/g/g-vault-202003' not found."
   exit -1
 fi
 
