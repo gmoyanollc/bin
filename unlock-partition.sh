@@ -17,7 +17,7 @@
 # 
 
 set -x
-source ./lib/get-last-device.sh
+source ~/bin/lib/get-last-device.sh
 lsblk --output NAME,TRAN,TYPE,FSTYPE,MOUNTPOINT,STATE | grep "NAME\|crypt\|disk\|loop"
 echo -e "\n[PROMPT] Enter 'NAME' for 'FSTYPE': 'crypto_LUKS' without a 'MOUNTPOINT' path.\n"
 lastDevice=$(getLastDevice loop)

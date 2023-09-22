@@ -5,7 +5,7 @@
 # 1. import this file
 # 
 # ```
-#  source ./lib/get-last-device.sh
+#  source ~/bin/lib/get-last-device.sh
 #
 # ```
 #
