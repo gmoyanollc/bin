@@ -20,7 +20,7 @@
 lsblk --output NAME,TRAN,TYPE,FSTYPE,MOUNTPOINT,STATE | grep "NAME\|crypt\|disk\|loop"
 echo -e "\n[PROMPT] Enter 'NAME' for 'FSTYPE': 'crypto_LUKS' without a 'MOUNTPOINT' path.\n"
 unusedDevice=$(losetup -f)
-device=$(zenity --entry= --entry-text="${unusedDevice##*dev/}" --text="[sd[a-z][n]] [loop[n]]")
+device=$(zenity --entry --entry-text="${unusedDevice##*dev/}" --text="[sd[a-z][n]] [loop[n]]")
 echo "[INFO] unlocking partition at block device /dev/${device}..."
 clevisUnlockResult=$((sudo clevis luks unlock -d /dev/${device}) 2>&1) 
 clevisUnlockReturnCode=${?}
