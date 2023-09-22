@@ -19,8 +19,12 @@
 #
 
 function getLastDevice() {
-  local devices=$(ls /dev/${1}?)
-  local lastDevice=${devices##*dev/}
-  echo ${lastDevice}
+  if [ -e "/dev/${1}0" ]; then
+    local devices=$(ls /dev/${1}?)
+    local lastDevice=${devices##*dev/}
+    echo ${lastDevice}
+  else
+    echo ${1}0
+  fi  
 }
 

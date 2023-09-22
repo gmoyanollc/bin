@@ -16,10 +16,12 @@
 # sudo dmsetup remove luks-b27bf382-a17c-4696-ab19-8a3778d5dd0c
 # 
 
-#set -x
+set -x
+source ./lib/get-last-device.sh
 lsblk --output NAME,TRAN,TYPE,FSTYPE,MOUNTPOINT,STATE | grep "NAME\|crypt\|disk\|loop"
 echo -e "\n[PROMPT] Enter 'NAME' for 'FSTYPE': 'crypto_LUKS' without a 'MOUNTPOINT' path.\n"
-device=$(zenity --entry= --entry-text="" --text="[sd[a-z][n]] [loop[n]]")
+lastDevice=$(getLastDevice loop)
+device=$(zenity --entry= --entry-text="${lastDevice}" --text="[sd[a-z][n]] [loop[n]]")
 echo "[INFO] unlocking partition at block device /dev/${device}..."
 clevisUnlockResult=$((sudo clevis luks unlock -d /dev/${device}) 2>&1) 
 clevisUnlockReturnCode=${?}
