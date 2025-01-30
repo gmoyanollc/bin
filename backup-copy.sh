@@ -25,6 +25,8 @@ set -x
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 HELP="usage: ${0} source target_dir"
+source=${1};
+target_dir=${2};
 USER_MOUNT_POINT="/run/media"
 #SYSTEM_MOUNT_POINT="/media"
 GREEN="\033[32m"
